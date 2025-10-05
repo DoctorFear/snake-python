@@ -14,6 +14,15 @@ class Game:
         global GAME_WIDTH, GAME_HEIGHT
         GAME_WIDTH = self.tmx_map.width * TILE_SIZE
         GAME_HEIGHT = self.tmx_map.height * TILE_SIZE
+        # Load sound effect
+        pygame.mixer.init()
+        self.collect_sound = pygame.mixer.Sound("data/sounds/collect.wav")
+        self.dead_sound = pygame.mixer.Sound("data/sounds/dead_1.wav")
+        pygame.mixer.music.load("data/sounds/pixel-song.wav")
+        # Chạy nhạc nền loop vô tận (-1 = loop infinite)
+        pygame.mixer.music.play(-1)
+        # Tùy chỉnh volume (0.0 ~ 1.0)
+        pygame.mixer.music.set_volume(0.5)
         # Lấy danh sách vị trí hợp lệ cho thức ăn
         self.valid_positions = self.get_valid_positions()
         self.walls = []
@@ -63,7 +72,7 @@ class Game:
 
     def handle_input(self, key):
         if not self.is_game_over:
-            self.snake.input()
+            self.snake.input(key)
         else:
             if key == pygame.K_SPACE:
                 self.reset()
@@ -74,6 +83,7 @@ class Game:
         if snake_head_pos == food_grid_pos:
             self.snake.score += 1
             self.snake.grow()  # Gọi phương thức grow để tăng độ dài rắn
+            self.collect_sound.play() #Sound effect khi ăn food
             self.food.respawn(self.snake)
 
     def reset(self):
@@ -85,6 +95,9 @@ class Game:
     def update(self, dt):
         if not self.is_game_over:
             self.is_game_over = self.snake.update(dt, self.food, self.walls)
+            if self.is_game_over:
+                self.dead_sound.play()  # Phát âm thanh khi chết
+                pygame.mixer.music.stop() 
             self.check_collisions()
 
     def draw(self, surface):

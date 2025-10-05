@@ -11,6 +11,7 @@ class Snake(pygame.sprite.Sprite):
         self.head_image = import_image('data', 'images', 'head', alpha=True)
         self.body_image = import_image('data', 'images', 'body_straight', alpha=True)
         self.tail_image = import_image('data', 'images', 'tail', alpha=True)
+        self.move_sound = pygame.mixer.Sound("data/sounds/tap.wav")
 
         # Load 8 corner images
         self.corner_images = {}
@@ -51,16 +52,19 @@ class Snake(pygame.sprite.Sprite):
         self.move_interval = 0.15
         self.new_direction = self.direction
 
-    def input(self):
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP] and self.direction.y != 1:
+    def input(self,key):
+        if key == pygame.K_UP and self.direction.y != 1:
             self.new_direction = Vector2(0, -1)
-        elif keys[pygame.K_DOWN] and self.direction.y != -1:
+            self.move_sound.play()
+        elif key == pygame.K_DOWN and self.direction.y != -1:
             self.new_direction = Vector2(0, 1)
-        elif keys[pygame.K_LEFT] and self.direction.x != 1:
+            self.move_sound.play()
+        elif key == pygame.K_LEFT and self.direction.x != 1:
             self.new_direction = Vector2(-1, 0)
-        elif keys[pygame.K_RIGHT] and self.direction.x != -1:
+            self.move_sound.play()
+        elif key == pygame.K_RIGHT and self.direction.x != -1:
             self.new_direction = Vector2(1, 0)
+            self.move_sound.play()
 
     def check_collision(self, walls):
         new_head = self.body[0] + self.direction
@@ -79,7 +83,7 @@ class Snake(pygame.sprite.Sprite):
 
 
     def update(self, dt, food, walls):
-        self.input()
+        # self.input()
         self.time_since_move += dt
         if self.time_since_move >= self.move_interval:
             self.direction = self.new_direction
