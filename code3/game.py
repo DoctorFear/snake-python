@@ -97,6 +97,8 @@ class Game:
         self.setup()  # Tạo lại rắn và thức ăn
         self.is_game_over = False
 
+        pygame.mixer.music.play(-1)
+
     def update(self, dt):
         if not self.is_game_over:
             self.is_game_over = self.snake.update(dt, self.food, self.walls, self.valid_positions)

@@ -56,21 +56,20 @@ class Snake(pygame.sprite.Sprite):
         self.new_direction = self.direction
 
     def input(self, key):
-        if key == pygame.K_s:
-            self.speed_multiplier = 2.0 if self.speed_multiplier == 1.0 else 1.0
-            self.move_interval = self.base_move_interval / self.speed_multiplier
-            self.move_sound.play()
+        old_dir = self.new_direction  # lưu hướng cũ
+
         if key == pygame.K_UP and self.direction.y != 1:
             self.new_direction = Vector2(0, -1)
-            self.move_sound.play()
         elif key == pygame.K_DOWN and self.direction.y != -1:
             self.new_direction = Vector2(0, 1)
-            self.move_sound.play()
         elif key == pygame.K_LEFT and self.direction.x != 1:
             self.new_direction = Vector2(-1, 0)
-            self.move_sound.play()
         elif key == pygame.K_RIGHT and self.direction.x != -1:
             self.new_direction = Vector2(1, 0)
+
+        # chỉ phát âm thanh khi có thay đổi hướng
+        if self.new_direction != old_dir:
+            self.move_sound.stop()
             self.move_sound.play()
 
     def check_collision(self, walls, valid_positions):
