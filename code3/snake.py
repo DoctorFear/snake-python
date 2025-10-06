@@ -4,10 +4,11 @@ from setting import TILE_SIZE
 from support import import_image
 
 class Snake(pygame.sprite.Sprite):
-    def __init__(self, pos, groups):
+    def __init__(self, pos, groups, game_width, game_height):
         super().__init__(groups)
+        self.game_width = game_width
+        self.game_height = game_height
         # Load images for head, body, tail
-
         self.head_image = import_image('data', 'images', 'head', alpha=True)
         self.body_image = import_image('data', 'images', 'body_straight', alpha=True)
         self.tail_image = import_image('data', 'images', 'tail', alpha=True)
@@ -49,10 +50,16 @@ class Snake(pygame.sprite.Sprite):
         self.segment_types = ['head', 'body', 'tail']
         self.score = 0
         self.time_since_move = 0
-        self.move_interval = 0.15
+        self.base_move_interval = 0.15  # Base interval for movement
+        self.speed_multiplier = 1.0  # Default speed multiplier
+        self.move_interval = self.base_move_interval / self.speed_multiplier
         self.new_direction = self.direction
 
-    def input(self,key):
+    def input(self, key):
+        if key == pygame.K_s:
+            self.speed_multiplier = 2.0 if self.speed_multiplier == 1.0 else 1.0
+            self.move_interval = self.base_move_interval / self.speed_multiplier
+            self.move_sound.play()
         if key == pygame.K_UP and self.direction.y != 1:
             self.new_direction = Vector2(0, -1)
             self.move_sound.play()
@@ -66,13 +73,45 @@ class Snake(pygame.sprite.Sprite):
             self.new_direction = Vector2(1, 0)
             self.move_sound.play()
 
-    def check_collision(self, walls):
+    def check_collision(self, walls, valid_positions):
         new_head = self.body[0] + self.direction
-        if new_head in walls:
-            return True
+
+        # Kiểm tra va chạm với tường hoặc ranh giới bản đồ
+        if new_head in walls or new_head.x < 0 or new_head.x >= self.game_width // TILE_SIZE or new_head.y < 0 or new_head.y >= self.game_height // TILE_SIZE:
+            # Wrap around cho tường và ranh giới
+            if new_head.x < 0 or (new_head in walls and self.direction.x == -1):
+                new_head.x = self.game_width // TILE_SIZE - 1
+            elif new_head.x >= self.game_width // TILE_SIZE or (new_head in walls and self.direction.x == 1):
+                new_head.x = 0
+            if new_head.y < 0 or (new_head in walls and self.direction.y == -1):
+                new_head.y = self.game_height // TILE_SIZE - 1
+            elif new_head.y >= self.game_height // TILE_SIZE or (new_head in walls and self.direction.y == 1):
+                new_head.y = 0
+
+            # Kiểm tra vị trí mới có hợp lệ không
+            max_attempts = 10
+            attempts = 0
+            while new_head in walls and attempts < max_attempts:
+                # Điều chỉnh vị trí để tránh tường
+                if self.direction.x == 1:
+                    new_head.x += 1
+                elif self.direction.x == -1:
+                    new_head.x -= 1
+                if self.direction.y == 1:
+                    new_head.y += 1
+                elif self.direction.y == -1:
+                    new_head.y -= 1
+                attempts += 1
+            if attempts >= max_attempts or new_head not in valid_positions:
+                print("Game over: Cannot find valid position after wrap")
+                return True, new_head
+
+        # Kiểm tra va chạm với thân rắn
         if new_head in self.body[1:]:
-            return True
-        return False
+            print("Game over: Collided with self")
+            return True, new_head
+
+        return False, new_head
 
     def grow(self):
         tail_dir = self.body[-2] - self.body[-1] if len(self.body) >= 2 else Vector2(1, 0)
@@ -81,14 +120,12 @@ class Snake(pygame.sprite.Sprite):
         if len(self.segment_types) >= 2:
             self.segment_types[-2] = 'body'
 
-
-    def update(self, dt, food, walls):
-        # self.input()
+    def update(self, dt, food, walls, valid_positions):
         self.time_since_move += dt
         if self.time_since_move >= self.move_interval:
             self.direction = self.new_direction
-            new_head = self.body[0] + self.direction
-            if self.check_collision(walls):
+            collision, new_head = self.check_collision(walls, valid_positions)
+            if collision:
                 return True
             self.body.insert(0, new_head)
             self.segment_types.insert(0, 'head')
@@ -169,4 +206,3 @@ class Snake(pygame.sprite.Sprite):
         elif prev_dir == Vector2(1, 0) and next_dir == Vector2(0, 1):
             return 'right_to_down'    # Phải -> Xuống
         return 'right_to_up'  # Mặc định nếu không khớp
-

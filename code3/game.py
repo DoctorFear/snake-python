@@ -5,6 +5,7 @@ from snake import Snake
 from food import Food
 from sprite import Sprite
 from pytmx.util_pygame import load_pygame
+from support import import_image
 
 class Game:
     def __init__(self, groups, tmx_path='data/levels/222.tmx'):
@@ -27,6 +28,10 @@ class Game:
         self.valid_positions = self.get_valid_positions()
         self.walls = []
         self.is_game_over = False
+
+        self.background = import_image('graphics', 'backgrounds', 'forest', alpha=False)
+        self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
+
         self.setup()
 
     def setup(self):
@@ -40,7 +45,7 @@ class Game:
                 break
         if snake_spawn is None:
             snake_spawn = (WIDTH // 2, HEIGHT // 2)  # Fallback
-        self.snake = Snake(snake_spawn, self.groups)
+        self.snake = Snake(snake_spawn, self.groups, GAME_WIDTH, GAME_HEIGHT)
         self.food = Food(self.groups, self.snake, self.valid_positions)
 
     def get_valid_positions(self):
@@ -94,14 +99,14 @@ class Game:
 
     def update(self, dt):
         if not self.is_game_over:
-            self.is_game_over = self.snake.update(dt, self.food, self.walls)
+            self.is_game_over = self.snake.update(dt, self.food, self.walls, self.valid_positions)
             if self.is_game_over:
                 self.dead_sound.play()  # Phát âm thanh khi chết
                 pygame.mixer.music.stop() 
             self.check_collisions()
 
     def draw(self, surface):
-        surface.fill(BLACK)
+        surface.blit(self.background, (0, 0))
         self.groups.draw(self.snake)
         if self.is_game_over:
             font = pygame.font.SysFont('Arial', 50)
