@@ -12,7 +12,7 @@ class Menu:
         self.buttons = [
             Button(WIDTH//2 - 200, HEIGHT//2 - 5, 400, 70, "Play", "#4d4d4d", "#3a3a3a", font),
             Button(WIDTH//2 - 200, HEIGHT//2 + 100, 400, 70, "Settings", "#4d4d4d", "#3a3a3a", font),
-            Button(1250, 580, 150, 70, "Quit", "#4d4d4d", "#3a3a3a", font)
+            Button(1300, 630, 150, 70, "Quit", "#4d4d4d", "#3a3a3a", font)
         ]
 
         # --- Load texture viền ---
@@ -27,18 +27,18 @@ class Menu:
             self.has_border = False
             self.tile_size = 50
 
-    def draw_border(self, screen):
-        """Vẽ viền gạch vàng xung quanh khung menu"""
-        if self.has_border:
-            for x in range(0, WIDTH, self.tile_size):
-                screen.blit(self.border_img, (x, 0))  # viền trên
-                screen.blit(self.border_img, (x, HEIGHT - self.tile_size))  # viền dưới
-            for y in range(0, HEIGHT, self.tile_size):
-                screen.blit(self.border_img, (0, y))  # viền trái
-                screen.blit(self.border_img, (WIDTH - self.tile_size, y))  # viền phải
-        else:
-            # Vẽ viền đơn giản nếu không có texture
-            pygame.draw.rect(screen, (255, 215, 0), (0, 0, WIDTH, HEIGHT), 10)
+    # def draw_border(self, screen):
+        # """Vẽ viền gạch vàng xung quanh khung menu"""
+        # if self.has_border:
+        #     for x in range(0, WIDTH, self.tile_size):
+        #         screen.blit(self.border_img, (x, 0))  # viền trên
+        #         screen.blit(self.border_img, (x, HEIGHT - self.tile_size))  # viền dưới
+        #     for y in range(0, HEIGHT, self.tile_size):
+        #         screen.blit(self.border_img, (0, y))  # viền trái
+        #         screen.blit(self.border_img, (WIDTH - self.tile_size, y))  # viền phải
+        # else:
+        #     # Vẽ viền đơn giản nếu không có texture
+        #     pygame.draw.rect(screen, (255, 215, 0), (0, 0, WIDTH, HEIGHT), 10)
 
     def render_text_with_shadow(self, text, font, text_color, shadow_color, shadow_offset=(3, 3)):
         """Tạo text với bóng đổ"""
@@ -76,7 +76,7 @@ class Menu:
             pygame.draw.line(screen, (r, g, b), (0, y), (screen.get_width(), y))
         
         # --- Vẽ viền gạch vàng ---
-        self.draw_border(screen)
+        # self.draw_border(screen)
         
         # --- Tiêu đề ---
         title_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 80)
