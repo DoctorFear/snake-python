@@ -8,124 +8,126 @@ class Snake(pygame.sprite.Sprite):
         super().__init__(groups)
         self.game_width = game_width
         self.game_height = game_height
-        # Load images for head, body, tail
-        self.head_image = import_image('data', 'images', 'head', alpha=True)
-        self.body_image = import_image('data', 'images', 'body_straight', alpha=True)
-        self.tail_image = import_image('data', 'images', 'tail', alpha=True)
+
+        # --- Load ảnh đầu (4 frame) ---
+        self.head_images = [
+            import_image('data', 'images', 'head', f'head_{i+1}', alpha=True)
+            for i in range(4)
+        ]
+        self.current_head_frame = 0
+        self.head_image = pygame.transform.scale(self.head_images[0], (TILE_SIZE, TILE_SIZE))
+
+        # --- Load ảnh đuôi (4 frame) ---
+        self.tail_images = [
+            import_image('data', 'images', 'tail', f'tail_{i+1}', alpha=True)
+            for i in range(4)
+        ]
+        self.current_tail_frame = 0
+        self.tail_image = pygame.transform.scale(self.tail_images[0], (TILE_SIZE, TILE_SIZE))
+
+        # --- Load ảnh thân (4 frame) ---
+        self.body_images = [
+            import_image('data', 'images', 'body', f'body_{i+1}', alpha=True)
+            for i in range(4)
+        ]
+        self.current_body_frame = 0
+        self.body_image = pygame.transform.scale(self.body_images[0], (TILE_SIZE, TILE_SIZE))
+
         self.move_sound = pygame.mixer.Sound("data/sounds/tap.wav")
 
-        # Load 8 corner images
+        # --- Load ảnh góc ---
         self.corner_images = {}
         corner_configs = [
-            ('right_to_up', '1'),      # Phải -> Lên
-            ('up_to_right', '2'),      # Lên -> Phải
-            ('up_to_left', '3'),       # Lên -> Trái
-            ('left_to_up', '4'),       # Trái -> Lên
-            ('left_to_down', '5'),     # Trái -> Xuống
-            ('down_to_left', '6'),     # Xuống -> Trái
-            ('down_to_right', '7'),    # Xuống -> Phải
-            ('right_to_down', '8')     # Phải -> Xuống
+            ('right_to_up', '1a'),
+            ('up_to_right', '2a'),
+            ('up_to_left', '3a'),
+            ('left_to_up', '4a'),
+            ('left_to_down', '5a'),
+            ('down_to_left', '6a'),
+            ('down_to_right', '7a'),
+            ('right_to_down', '8a')
         ]
-        
-        for corner_name, file_name in corner_configs:
-            self.corner_images[corner_name] = pygame.transform.scale(
-                import_image('data', 'images', file_name, alpha=True), (TILE_SIZE, TILE_SIZE)
+        for name, file_name in corner_configs:
+            self.corner_images[name] = pygame.transform.scale(
+                import_image('data', 'images', 'rotate_body', file_name, alpha=True),
+                (TILE_SIZE, TILE_SIZE)
             )
 
-        # Scale other images (head, body, tail)
-        self.head_image = pygame.transform.scale(self.head_image, (TILE_SIZE, TILE_SIZE))
-        self.body_image = pygame.transform.scale(self.body_image, (TILE_SIZE, TILE_SIZE))
-        self.tail_image = pygame.transform.scale(self.tail_image, (TILE_SIZE, TILE_SIZE))
-
-        # Set initial image (head)
+        # --- Khởi tạo ---
         self.image = self.head_image
         self.rect = self.image.get_rect(topleft=pos)
-        self.direction = Vector2(1, 0)  # Hướng ban đầu: sang phải
-        self.speed = 200
+        self.direction = Vector2(1, 0)
         self.body = [
-            Vector2(pos[0] // TILE_SIZE, pos[1] // TILE_SIZE),  # Đầu
-            Vector2(pos[0] // TILE_SIZE - 1, pos[1] // TILE_SIZE),  # Thân
-            Vector2(pos[0] // TILE_SIZE - 2, pos[1] // TILE_SIZE)   # Đuôi
+            Vector2(pos[0] // TILE_SIZE, pos[1] // TILE_SIZE),
+            Vector2(pos[0] // TILE_SIZE - 1, pos[1] // TILE_SIZE),
+            Vector2(pos[0] // TILE_SIZE - 2, pos[1] // TILE_SIZE)
         ]
         self.segment_types = ['head', 'body', 'tail']
-        self.score = 0
+
         self.time_since_move = 0
-        self.base_move_interval = 0.15  # Base interval for movement
-        self.speed_multiplier = 1.0  # Default speed multiplier
+        self.base_move_interval = 0.15
+        self.speed_multiplier = 1.0
         self.move_interval = self.base_move_interval / self.speed_multiplier
         self.new_direction = self.direction
+        self.score = 0 
 
-    def input(self, key):
-        old_dir = self.new_direction  # lưu hướng cũ
+        # --- Animation ---
+        self.frame_timer = 0
+        self.frame_rate = 4  # 4 FPS (mỗi 0.25 giây đổi frame)
 
-        if key == pygame.K_UP and self.direction.y != 1:
-            self.new_direction = Vector2(0, -1)
-        elif key == pygame.K_DOWN and self.direction.y != -1:
-            self.new_direction = Vector2(0, 1)
-        elif key == pygame.K_LEFT and self.direction.x != 1:
-            self.new_direction = Vector2(-1, 0)
-        elif key == pygame.K_RIGHT and self.direction.x != -1:
-            self.new_direction = Vector2(1, 0)
+    # ------------------ INPUT ------------------
+    def input(self, event):
+        if event.type == pygame.KEYDOWN:
+            old_dir = self.new_direction
+            if event.key == pygame.K_UP and self.direction.y != 1:
+                self.new_direction = Vector2(0, -1)
+            elif event.key == pygame.K_DOWN and self.direction.y != -1:
+                self.new_direction = Vector2(0, 1)
+            elif event.key == pygame.K_LEFT and self.direction.x != 1:
+                self.new_direction = Vector2(-1, 0)
+            elif event.key == pygame.K_RIGHT and self.direction.x != -1:
+                self.new_direction = Vector2(1, 0)
+            elif event.key == pygame.K_s:
+                self.speed_multiplier = 2.0
+            if self.new_direction != old_dir:
+                self.move_sound.stop()
+                self.move_sound.play()
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_s:
+                self.speed_multiplier = 1.0
 
-        # chỉ phát âm thanh khi có thay đổi hướng
-        if self.new_direction != old_dir:
-            self.move_sound.stop()
-            self.move_sound.play()
-
-    def check_collision(self, walls, valid_positions):
+    # ------------------ COLLISION ------------------
+    def check_collision(self, walls):
         new_head = self.body[0] + self.direction
-
-        # Kiểm tra va chạm với tường hoặc ranh giới bản đồ
-        if new_head in walls or new_head.x < 0 or new_head.x >= self.game_width // TILE_SIZE or new_head.y < 0 or new_head.y >= self.game_height // TILE_SIZE:
-            # Wrap around cho tường và ranh giới
-            if new_head.x < 0 or (new_head in walls and self.direction.x == -1):
-                new_head.x = self.game_width // TILE_SIZE - 1
-            elif new_head.x >= self.game_width // TILE_SIZE or (new_head in walls and self.direction.x == 1):
-                new_head.x = 0
-            if new_head.y < 0 or (new_head in walls and self.direction.y == -1):
-                new_head.y = self.game_height // TILE_SIZE - 1
-            elif new_head.y >= self.game_height // TILE_SIZE or (new_head in walls and self.direction.y == 1):
-                new_head.y = 0
-
-            # Kiểm tra vị trí mới có hợp lệ không
-            max_attempts = 10
-            attempts = 0
-            while new_head in walls and attempts < max_attempts:
-                # Điều chỉnh vị trí để tránh tường
-                if self.direction.x == 1:
-                    new_head.x += 1
-                elif self.direction.x == -1:
-                    new_head.x -= 1
-                if self.direction.y == 1:
-                    new_head.y += 1
-                elif self.direction.y == -1:
-                    new_head.y -= 1
-                attempts += 1
-            if attempts >= max_attempts or new_head not in valid_positions:
-                print("Game over: Cannot find valid position after wrap")
-                return True, new_head
-
-        # Kiểm tra va chạm với thân rắn
+        if (new_head in walls or
+            new_head.x < 0 or new_head.x >= self.game_width // TILE_SIZE or
+            new_head.y < 0 or new_head.y >= self.game_height // TILE_SIZE):
+            print("Game over: Hit wall or boundary")
+            return True
         if new_head in self.body[1:]:
             print("Game over: Collided with self")
-            return True, new_head
+            return True
+        return False
 
-        return False, new_head
+    # ------------------ UPDATE ------------------
+    def update(self, dt, food, walls):
+        # --- Cập nhật animation (đầu & đuôi) ---
+        self.frame_timer += dt
+        if self.frame_timer >= 1 / self.frame_rate:
+            self.current_head_frame = (self.current_head_frame + 1) % 4
+            self.current_tail_frame = (self.current_tail_frame + 1) % 4
+            self.head_image = pygame.transform.scale(self.head_images[self.current_head_frame], (TILE_SIZE, TILE_SIZE))
+            self.tail_image = pygame.transform.scale(self.tail_images[self.current_tail_frame], (TILE_SIZE, TILE_SIZE))
+            self.frame_timer = 0
 
-    def grow(self):
-        tail_dir = self.body[-2] - self.body[-1] if len(self.body) >= 2 else Vector2(1, 0)
-        self.body.append(self.body[-1] - tail_dir)  # Thêm đoạn mới theo hướng đuôi
-        self.segment_types.append('tail')
-        if len(self.segment_types) >= 2:
-            self.segment_types[-2] = 'body'
-
-    def update(self, dt, food, walls, valid_positions):
+        # --- Cập nhật di chuyển ---
         self.time_since_move += dt
+        self.move_interval = self.base_move_interval / self.speed_multiplier
         if self.time_since_move >= self.move_interval:
             self.direction = self.new_direction
-            collision, new_head = self.check_collision(walls, valid_positions)
-            if collision:
+            if self.check_collision(walls):
                 return True
+            new_head = self.body[0] + self.direction
             self.body.insert(0, new_head)
             self.segment_types.insert(0, 'head')
             self.body.pop()
@@ -139,69 +141,82 @@ class Snake(pygame.sprite.Sprite):
             self.time_since_move = 0
         return False
 
+    # ------------------ GROW ------------------
+    def grow(self):
+        tail_dir = self.body[-2] - self.body[-1] if len(self.body) >= 2 else Vector2(1, 0)
+        self.body.append(self.body[-1] - tail_dir)
+        self.segment_types.append('tail')
+        if len(self.segment_types) >= 2:
+            self.segment_types[-2] = 'body'
+
+    # ------------------ DRAW ------------------
     def draw(self, surface):
         for i, segment in enumerate(self.body):
-            segment_rect = pygame.Rect(segment.x * TILE_SIZE, segment.y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+            # Xác định vị trí từng đoạn
+            segment_rect = pygame.Rect(
+                segment.x * TILE_SIZE, 
+                segment.y * TILE_SIZE, 
+                TILE_SIZE, 
+                TILE_SIZE
+            )
+
+            # --- ĐẦU RẮN ---
             if self.segment_types[i] == 'head':
                 image = self.head_image
                 angle = self.get_rotation_angle(self.direction)
                 rotated_image = pygame.transform.rotate(image, angle)
+
+            # --- ĐUÔI RẮN ---
             elif self.segment_types[i] == 'tail' and len(self.body) > 1:
                 image = self.tail_image
-                tail_direction = self.body[-2] - self.body[-1]
+                tail_direction = (self.body[-2] - self.body[-1]).normalize()
                 angle = self.get_rotation_angle(tail_direction)
                 rotated_image = pygame.transform.rotate(image, angle)
-            elif self.segment_types[i] == 'body' and len(self.body) > 1 and i > 0:
+
+            # --- THÂN RẮN ---
+            elif self.segment_types[i] == 'body' and len(self.body) > 1 and 0 < i < len(self.body) - 1:
                 prev_segment = self.body[i - 1]
-                next_segment = self.body[i + 1] if i < len(self.body) - 1 else segment + self.direction
-                prev_dir = segment - prev_segment
-                next_dir = next_segment - segment
-                if prev_dir.x * next_dir.x + prev_dir.y * next_dir.y == 0:  # Góc 90 độ
+                next_segment = self.body[i + 1]
+
+                prev_dir = (segment - prev_segment).normalize()
+                next_dir = (next_segment - segment).normalize()
+
+                # Nếu hướng khác nhau → là góc cua
+                if prev_dir.x * next_dir.x + prev_dir.y * next_dir.y == 0:
                     corner_key = self.get_corner_key(prev_dir, next_dir)
-                    image = self.corner_images.get(corner_key, self.body_image)
-                    rotated_image = image  # Không xoay, vì hình ảnh đã được thiết kế sẵn
+                    rotated_image = self.corner_images.get(corner_key, self.body_image)
                 else:
-                    image = self.body_image
-                    direction = next_segment - prev_segment
+                    # Đoạn thẳng
+                    direction = next_dir
                     angle = self.get_rotation_angle(direction)
-                    rotated_image = pygame.transform.rotate(image, angle)
+                    rotated_image = pygame.transform.rotate(self.body_image, angle)
+
+            # --- TRƯỜNG HỢP DỰ PHÒNG ---
             else:
                 rotated_image = self.body_image
+
+            # Vẽ đoạn rắn
             rotated_rect = rotated_image.get_rect(center=segment_rect.center)
             surface.blit(rotated_image, rotated_rect)
 
+
+    # ------------------ ROTATION HELPERS ------------------
     def get_rotation_angle(self, direction):
         if direction.length() == 0:
             return 0
         direction = direction.normalize()
         if abs(direction.x) > abs(direction.y):
-            if direction.x > 0:
-                return 0
-            else:
-                return 180
+            return 0 if direction.x > 0 else 180
         else:
-            if direction.y > 0:
-                return -90
-            else:
-                return 90
-        return 0
+            return -90 if direction.y > 0 else 90
 
     def get_corner_key(self, prev_dir, next_dir):
-        """Xác định loại góc cua dựa trên hướng trước và sau"""
-        if prev_dir == Vector2(1, 0) and next_dir == Vector2(0, -1):
-            return 'right_to_up'      # Phải -> Lên
-        elif prev_dir == Vector2(0, -1) and next_dir == Vector2(1, 0):
-            return 'up_to_right'      # Lên -> Phải
-        elif prev_dir == Vector2(0, -1) and next_dir == Vector2(-1, 0):
-            return 'up_to_left'       # Lên -> Trái
-        elif prev_dir == Vector2(-1, 0) and next_dir == Vector2(0, -1):
-            return 'left_to_up'       # Trái -> Lên
-        elif prev_dir == Vector2(-1, 0) and next_dir == Vector2(0, 1):
-            return 'left_to_down'     # Trái -> Xuống
-        elif prev_dir == Vector2(0, 1) and next_dir == Vector2(-1, 0):
-            return 'down_to_left'     # Xuống -> Trái
-        elif prev_dir == Vector2(0, 1) and next_dir == Vector2(1, 0):
-            return 'down_to_right'    # Xuống -> Phải
-        elif prev_dir == Vector2(1, 0) and next_dir == Vector2(0, 1):
-            return 'right_to_down'    # Phải -> Xuống
-        return 'right_to_up'  # Mặc định nếu không khớp
+        if prev_dir == Vector2(1, 0) and next_dir == Vector2(0, -1): return 'right_to_up'
+        if prev_dir == Vector2(0, -1) and next_dir == Vector2(1, 0): return 'up_to_right'
+        if prev_dir == Vector2(0, -1) and next_dir == Vector2(-1, 0): return 'up_to_left'
+        if prev_dir == Vector2(-1, 0) and next_dir == Vector2(0, -1): return 'left_to_up'
+        if prev_dir == Vector2(-1, 0) and next_dir == Vector2(0, 1): return 'left_to_down'
+        if prev_dir == Vector2(0, 1) and next_dir == Vector2(-1, 0): return 'down_to_left'
+        if prev_dir == Vector2(0, 1) and next_dir == Vector2(1, 0): return 'down_to_right'
+        if prev_dir == Vector2(1, 0) and next_dir == Vector2(0, 1): return 'right_to_down'
+        return 'right_to_up'
