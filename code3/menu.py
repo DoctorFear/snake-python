@@ -1,5 +1,6 @@
 import pygame
 from button import Button
+from gui import *
 from setting import WIDTH, HEIGHT, WHITE, RED, BLUE, YELLOW, BLACK
 import os
 
@@ -39,48 +40,19 @@ class Menu:
         # else:
         #     # Vẽ viền đơn giản nếu không có texture
         #     pygame.draw.rect(screen, (255, 215, 0), (0, 0, WIDTH, HEIGHT), 10)
-
-    def render_text_with_shadow(self, text, font, text_color, shadow_color, shadow_offset=(3, 3)):
-        """Tạo text với bóng đổ"""
-        # Render text chính và shadow
-        base_surface = font.render(text, False, text_color)
-        shadow_surface = font.render(text, False, shadow_color)
-        
-        # Tạo surface đủ lớn chứa cả text và shadow
-        offset_x, offset_y = shadow_offset
-        w = base_surface.get_width() + abs(offset_x)
-        h = base_surface.get_height() + abs(offset_y)
-        result = pygame.Surface((w, h), pygame.SRCALPHA)
-        
-        # Vẽ shadow trước (phía dưới)
-        result.blit(shadow_surface, (offset_x, offset_y))
-        
-        # Vẽ text chính lên trên
-        result.blit(base_surface, (0, 0))
-        
-        return result
     
     def draw(self, screen):
-        # --- Nền đen giống game ---
+        # --- Nền gradient ---
         top_color = (0, 174, 239)
         bottom_color = (0, 114, 188)
-        height = screen.get_height()
-
-        for y in range(height):
-            # Tính tỉ lệ màu theo chiều cao
-            ratio = y / height
-            r = int(top_color[0] * (1 - ratio) + bottom_color[0] * ratio)
-            g = int(top_color[1] * (1 - ratio) + bottom_color[1] * ratio)
-            b = int(top_color[2] * (1 - ratio) + bottom_color[2] * ratio)
-
-            pygame.draw.line(screen, (r, g, b), (0, y), (screen.get_width(), y))
+        draw_gradient_background(screen, top_color, bottom_color)
         
         # --- Vẽ viền gạch vàng ---
         # self.draw_border(screen)
         
         # --- Tiêu đề ---
         title_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 80)
-        title_text = self.render_text_with_shadow("Dragon Hunter", title_font, WHITE, BLACK, shadow_offset=(0, 5))
+        title_text = render_text_with_shadow("DRAGON HUNTER", title_font, WHITE, BLACK, shadow_offset=(0, 5))
         screen.blit(title_text, (WIDTH//2 - title_text.get_width()//2, HEIGHT//2 - 270))
         
         # --- Vẽ các nút ---

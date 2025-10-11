@@ -1,6 +1,7 @@
 import pygame
 from button import Button
 from slider import Slider
+from gui import *
 from setting import WIDTH, HEIGHT, WHITE, GREY, GREEN
 import os
 
@@ -8,14 +9,14 @@ class SettingsMenu:
     """Menu cài đặt"""
     def __init__(self, game_manager):
         self.game_manager = game_manager
-        font = pygame.font.SysFont("Arial", 35)
+        font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 25)
 
         self.speed = 0.5
-        self.minus_btn = Button(WIDTH//2 - 120, 200, 50, 50, "-", GREY, (180,180,180), font)
-        self.plus_btn = Button(WIDTH//2 + 70, 200, 50, 50, "+", GREY, (180,180,180), font)
+        self.minus_btn = Button(WIDTH//2 - 180, 225, 30, 30, "-", "#4d4d4d", "#3a3a3a", font)
+        self.plus_btn = Button(WIDTH//2 + 140, 225, 30, 30, "+", "#4d4d4d", "#3a3a3a", font)
 
         self.slider = Slider(WIDTH//2 - 150, 350, 300)
-        self.back_btn = Button(WIDTH//2 - 100, 450, 200, 60, "Back", (150,150,150), (200,200,200), font)
+        self.back_btn = Button(40, 655, 140, 60, "Back", "#4d4d4d", "#3a3a3a", font)
 
         # --- Load texture viền ---
         border_path = os.path.join("graphics", "objects", "items", "sandstone_carved.png")
@@ -29,34 +30,36 @@ class SettingsMenu:
             self.has_border = False
             self.tile_size = 50
 
-    def draw_border(self, screen):
+    # def draw_border(self, screen):
         """Vẽ viền vàng xung quanh khung menu"""
-        if self.has_border:
-            for x in range(0, WIDTH, self.tile_size):
-                screen.blit(self.border_img, (x, 0))  # viền trên
-                screen.blit(self.border_img, (x, HEIGHT - self.tile_size))  # viền dưới
-            for y in range(0, HEIGHT, self.tile_size):
-                screen.blit(self.border_img, (0, y))  # viền trái
-                screen.blit(self.border_img, (WIDTH - self.tile_size, y))  # viền phải
-        else:
-            # Vẽ viền đơn giản nếu không có texture
-            pygame.draw.rect(screen, (255, 215, 0), (0, 0, WIDTH, HEIGHT), 10)
+        # if self.has_border:
+        #     for x in range(0, WIDTH, self.tile_size):
+        #         screen.blit(self.border_img, (x, 0))  # viền trên
+        #         screen.blit(self.border_img, (x, HEIGHT - self.tile_size))  # viền dưới
+        #     for y in range(0, HEIGHT, self.tile_size):
+        #         screen.blit(self.border_img, (0, y))  # viền trái
+        #         screen.blit(self.border_img, (WIDTH - self.tile_size, y))  # viền phải
+        # else:
+        #     # Vẽ viền đơn giản nếu không có texture
+        #     pygame.draw.rect(screen, (255, 215, 0), (0, 0, WIDTH, HEIGHT), 10)
 
     def draw(self, screen):
         # --- Nền đen để đồng bộ giao diện ---
-        screen.fill((0, 0, 0))
+        top_color = (0, 174, 239)
+        bottom_color = (0, 114, 188)
+        draw_gradient_background(screen, top_color, bottom_color)
 
         # --- Vẽ viền ---
-        self.draw_border(screen)
+        # self.draw_border(screen)
 
         # --- Nội dung ---
-        title_font = pygame.font.SysFont("Arial", 50)
+        title_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 50)
         title = title_font.render("Settings", True, (255, 255, 255))
         screen.blit(title, (WIDTH//2 - title.get_width()//2, 100))
 
-        speed_font = pygame.font.SysFont("Arial", 30)
-        speed_text = speed_font.render(f"Speed: {self.speed:.2f}", True, (255, 255, 255))
-        screen.blit(speed_text, (WIDTH//2 - speed_text.get_width()//2, 160))
+        speed_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 30)
+        speed_text = speed_font.render(f"Speed: {self.speed:.2f}", True, WHITE)
+        screen.blit(speed_text, (WIDTH//2 - speed_text.get_width()//2, 200))
 
         self.minus_btn.draw(screen)
         self.plus_btn.draw(screen)
