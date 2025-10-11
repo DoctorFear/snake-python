@@ -45,9 +45,9 @@ class GameManager:
         elif self.state == "settings":
             self.settings_menu.handle_event(event)
         elif self.state == "game" and self.game:
-            # Xử lý phím bấm cho game
-            if event.type == pygame.KEYDOWN:
-                result = self.game.handle_input(event.key)
+            # Xử lý sự kiện cho game
+            if event.type in (pygame.KEYDOWN, pygame.KEYUP):
+                result = self.game.handle_input(event)
                 # Nếu game trả về "menu", chuyển về menu chính
                 if result == "menu":
                     self.change_state("menu")

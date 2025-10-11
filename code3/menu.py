@@ -80,7 +80,7 @@ class Menu:
         
         # --- Tiêu đề ---
         title_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 80)
-        title_text = self.render_text_with_shadow("ROSAMO", title_font, WHITE, BLACK, shadow_offset=(0, 5))
+        title_text = self.render_text_with_shadow("Dragon Hunter", title_font, WHITE, BLACK, shadow_offset=(0, 5))
         screen.blit(title_text, (WIDTH//2 - title_text.get_width()//2, HEIGHT//2 - 270))
         
         # --- Vẽ các nút ---
