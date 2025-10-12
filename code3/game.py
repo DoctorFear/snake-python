@@ -8,7 +8,7 @@ from pytmx.util_pygame import load_pygame
 from support import import_image
 
 class Game:
-    def __init__(self, groups, tmx_path='data/levels/222 copy.tmx'):
+    def __init__(self, groups, tmx_path, mode):
         self.groups = groups
         self.tmx_map = load_pygame(tmx_path)
         global GAME_WIDTH, GAME_HEIGHT
@@ -23,7 +23,8 @@ class Game:
         self.valid_positions = self.get_valid_positions()
         self.walls = []
         self.is_game_over = False
-        self.background = import_image('graphics', 'backgrounds', 'forest3', alpha=False)
+        background_file = 'forest3' if mode == 'easy' else 'forest4'
+        self.background = import_image('graphics', 'backgrounds', background_file, alpha=False)
         self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
         self.setup()
 

@@ -32,7 +32,9 @@ class GameManager:
     def change_state(self, new_state):
         if new_state == "game":
             self.all_sprites = AllSprites()
-            self.game = Game(self.all_sprites, 'data/levels/222 copy.tmx')
+            # Chọn map dựa trên selected_mode
+            map_path = 'data/levels/222 copy.tmx' if self.selected_mode == "easy" else 'data/levels/222.tmx'
+            self.game = Game(self.all_sprites, map_path, mode=self.selected_mode)
             # Áp dụng âm lượng cho game mới
             self.apply_volume()
         self.state = new_state
