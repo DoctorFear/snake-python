@@ -10,6 +10,8 @@ class SettingsMenu:
     def __init__(self, game_manager):
         self.game_manager = game_manager
         font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 25)
+        self.click_sound = pygame.mixer.Sound("data/sounds/tap.wav")
+        self.click_sound.set_volume(0.3)
 
         self.speed = 0.5
         self.minus_btn = Button(WIDTH//2 - 180, 225, 30, 30, "-", "#4d4d4d", "#3a3a3a", font)
@@ -73,7 +75,10 @@ class SettingsMenu:
         self.slider.handle_event(event)
         if self.minus_btn.is_clicked(event):
             self.speed = max(0.05, self.speed - 0.05)
+            self.click_sound.play()
         if self.plus_btn.is_clicked(event):
             self.speed = min(1.0, self.speed + 0.05)
+            self.click_sound.play()
         if self.back_btn.is_clicked(event):
+            self.click_sound.play()
             self.game_manager.change_state("menu")

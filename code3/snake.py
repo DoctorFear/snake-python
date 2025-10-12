@@ -34,6 +34,7 @@ class Snake(pygame.sprite.Sprite):
         self.body_image = pygame.transform.scale(self.body_images[0], (TILE_SIZE, TILE_SIZE))
 
         self.move_sound = pygame.mixer.Sound("data/sounds/tap.wav")
+        self.move_sound.set_volume(0.3)
 
         # --- Load ảnh góc ---
         self.corner_images = {}
@@ -124,8 +125,12 @@ class Snake(pygame.sprite.Sprite):
         self.time_since_move += dt
         self.move_interval = self.base_move_interval / self.speed_multiplier
         if self.time_since_move >= self.move_interval:
+            old_direction = self.direction
             self.direction = self.new_direction
+
             if self.check_collision(walls):
+                # Nếu chết → trả hướng lại như cũ để giữ visual
+                self.direction = old_direction
                 return True
             new_head = self.body[0] + self.direction
             self.body.insert(0, new_head)

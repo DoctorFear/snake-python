@@ -9,6 +9,9 @@ class Menu:
     def __init__(self, game_manager):
         self.game_manager = game_manager
         font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 30)
+        pygame.mixer.music.load("data/sounds/theme.wav")
+        pygame.mixer.music.play(-1)
+        pygame.mixer.music.set_volume(1)
 
         self.buttons = [
             Button(WIDTH//2 - 200, HEIGHT//2 - 5, 400, 70, "Play", "#4d4d4d", "#3a3a3a", font),
@@ -60,12 +63,16 @@ class Menu:
             b.draw(screen)
 
     def handle_event(self, event):
+        self.click_sound = pygame.mixer.Sound("data/sounds/tap.wav")
+        self.click_sound.set_volume(0.3)
         for b in self.buttons:
             if b.is_clicked(event):
                 if b.text == "Play":
+                    self.click_sound.play()
                     self.game_manager.change_state("mode_select")
                 elif b.text == "Settings":
                     self.game_manager.change_state("settings")
+                    self.click_sound.play()
                 elif b.text == "Quit":
                     pygame.quit()
                     exit()

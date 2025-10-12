@@ -9,6 +9,8 @@ class GameModeSelector:
     def __init__(self, game_manager):
         self.game_manager = game_manager
         font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 30)
+        self.click_sound = pygame.mixer.Sound("data/sounds/tap.wav")
+        self.click_sound.set_volume(0.3)
         self.buttons = [
             Button(WIDTH//2 - 100, HEIGHT//2 - 40, 220, 60, "Easy", "#4d4d4d", "#3a3a3a", font),
             Button(WIDTH//2 - 100, HEIGHT//2 + 40, 220, 60, "Hard", "#4d4d4d", "#3a3a3a", font),
@@ -62,10 +64,13 @@ class GameModeSelector:
         for b in self.buttons:
             if b.is_clicked(event):
                 if b.text == "Easy":
+                    self.click_sound.play()
                     self.game_manager.selected_mode = "easy"
                     self.game_manager.change_state("game")
                 elif b.text == "Hard":
+                    self.click_sound.play()
                     self.game_manager.selected_mode = "hard"
                     self.game_manager.change_state("game")
                 elif b.text == "Back":
+                    self.click_sound.play()
                     self.game_manager.change_state("menu")

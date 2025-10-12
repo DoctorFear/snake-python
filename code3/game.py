@@ -17,9 +17,9 @@ class Game:
         pygame.mixer.init()
         self.collect_sound = pygame.mixer.Sound("data/sounds/collect.wav")
         self.dead_sound = pygame.mixer.Sound("data/sounds/dead_1.wav")
-        pygame.mixer.music.load("data/sounds/pixel-song.wav")
+        pygame.mixer.music.load("data/sounds/hard-core.wav")
         pygame.mixer.music.play(-1)
-        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.set_volume(1)
         self.valid_positions = self.get_valid_positions()
         self.walls = []
         self.is_game_over = False
@@ -92,15 +92,18 @@ class Game:
 
     def update(self, dt):
         if not self.is_game_over:
+            self.food.update() 
             self.is_game_over = self.snake.update(dt, self.food, self.walls)
             if self.is_game_over:
                 self.dead_sound.play()
+                self.dead_sound.set_volume(0.8)
                 pygame.mixer.music.stop()
             self.check_collisions()
 
     def draw(self, surface):
         surface.blit(self.background, (0, 0))
         self.groups.draw(self.snake)
+        
         if self.is_game_over:
             font = pygame.font.SysFont('Arial', 50)
             text_surface = font.render('Game Over! Press Space', True, RED)
