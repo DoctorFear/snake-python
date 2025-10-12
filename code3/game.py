@@ -4,6 +4,7 @@ from setting import *
 from snake import Snake
 from food import Food
 from sprite import Sprite
+from enemy import Enemy
 from pytmx.util_pygame import load_pygame
 from support import import_image
 
@@ -17,9 +18,9 @@ class Game:
         pygame.mixer.init()
         self.collect_sound = pygame.mixer.Sound("data/sounds/collect.wav")
         self.dead_sound = pygame.mixer.Sound("data/sounds/dead_1.wav")
-        pygame.mixer.music.load("data/sounds/hard-core.wav")
+        pygame.mixer.music.load("data/sounds/pixel-song.wav")
         pygame.mixer.music.play(-1)
-        pygame.mixer.music.set_volume(1)
+        pygame.mixer.music.set_volume(0.5)
         self.valid_positions = self.get_valid_positions()
         self.walls = []
         self.is_game_over = False
@@ -27,6 +28,9 @@ class Game:
         self.background = import_image('graphics', 'backgrounds', background_file, alpha=False)
         self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
         self.setup()
+        self.enemy = None
+        self.enemy_spawn_time = None
+        self.enemy_active = False
 
     def setup(self):
         self.walls = self.create_walls()
@@ -84,26 +88,62 @@ class Game:
             self.collect_sound.play()
             self.food.respawn(self.snake)
 
+            if self.snake.score % 5 == 0:
+                # Spawn enemy ngay lập tức
+                self.enemy = Enemy(self.groups, self.snake, self.valid_positions,
+                                   self.tmx_map.width * TILE_SIZE,
+                                   self.tmx_map.height * TILE_SIZE)
+                self.enemy_spawn_time = pygame.time.get_ticks()
+                self.enemy_active = True
+
     def reset(self):
         self.groups.empty()
         self.walls = self.create_walls()
         self.setup()
         self.is_game_over = False
+        self.enemy = None
+        self.enemy_active = False
+        self.enemy_spawn_time = None  
         pygame.mixer.music.play(-1)
 
     def update(self, dt):
         if not self.is_game_over:
             self.food.update() 
             self.is_game_over = self.snake.update(dt, self.food, self.walls)
+            
             if self.is_game_over:
                 self.dead_sound.play()
                 self.dead_sound.set_volume(0.8)
                 pygame.mixer.music.stop()
+            
             self.check_collisions()
+
+            #kiểm tra va chạm
+            if self.enemy:
+                self.enemy.update(dt)  #Truyền dt vào để laser bắn từ từ
+                
+                #Kiểm tra va chạm với enemy hoặc laser
+                if self.enemy.check_collision_with_snake(self.snake):
+                    self.is_game_over = True
+                    self.dead_sound.play()
+                    self.dead_sound.set_volume(0.8)
+                    pygame.mixer.music.stop()
+                
+                # Xóa enemy sau 10 giây
+                elapsed = (pygame.time.get_ticks() - self.enemy_spawn_time) / 1000
+                if elapsed >= 6:
+                    self.enemy.kill()
+                    self.enemy = None
+                    self.enemy_active = False
+                    self.enemy_spawn_time = None
 
     def draw(self, surface):
         surface.blit(self.background, (0, 0))
         self.groups.draw(self.snake)
+        
+        #Vẽ laser của enemy
+        if self.enemy:
+            self.enemy.draw_laser(surface)
         
         if self.is_game_over:
             font = pygame.font.SysFont('Arial', 50)
