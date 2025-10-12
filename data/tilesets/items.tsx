@@ -25,7 +25,10 @@
    <tile id="7">
   <image source="../../graphics/objects/items/sapling_oak.png" width="50" height="50"/>
  </tile>
-   <tile id="8">
+`   <tile id="8">
   <image source="../../graphics/objects/items/sssss.png" width="50" height="50"/>
+ </tile>
+    <tile id="9">
+  <image source="../../graphics/objects/items/1.png" width="50" height="50"/>
  </tile>
 </tileset>
