@@ -29,31 +29,20 @@ class GameModeSelector:
             self.has_border = False
             self.tile_size = 50
 
-    # def draw_border(self, screen):
-    #     """Vẽ viền gạch vàng xung quanh khung menu"""
-    #     if self.has_border:
-    #         for x in range(0, WIDTH, self.tile_size):
-    #             screen.blit(self.border_img, (x, 0))  # viền trên
-    #             screen.blit(self.border_img, (x, HEIGHT - self.tile_size))  # viền dưới
-    #         for y in range(0, HEIGHT, self.tile_size):
-    #             screen.blit(self.border_img, (0, y))  # viền trái
-    #             screen.blit(self.border_img, (WIDTH - self.tile_size, y))  # viền phải
-    #     else:
-    #         # Vẽ viền đơn giản nếu không có texture
-    #         pygame.draw.rect(screen, (255, 215, 0), (0, 0, WIDTH, HEIGHT), 10)
 
     def draw(self, screen):
         # --- Nền gradient ---
         top_color = (0, 174, 239)
         bottom_color = (0, 114, 188)
         draw_gradient_background(screen, top_color, bottom_color)
+        #top_color = (255, 196, 140)   
+        #bottom_color = (179, 89, 0)   
+        #draw_gradient_background(screen, top_color, bottom_color)
         
-        # --- Vẽ viền gạch vàng ---
-        # self.draw_border(screen)
         
         # --- Tiêu đề ---
         title_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 50)
-        title = title_font.render("Select Mode", True, WHITE)
+        title = render_text_with_shadow("Select Mode", title_font, WHITE, BLACK, shadow_offset=(0, 5))
         screen.blit(title, (WIDTH//2 - title.get_width()//2, HEIGHT//2 - 200))
         
         # --- Vẽ các nút ---

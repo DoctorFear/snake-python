@@ -9,10 +9,12 @@ from pytmx.util_pygame import load_pygame
 from support import import_image
 from gui import render_text_with_shadow
 
+
 class Game:
-    def __init__(self, groups, tmx_path, mode):
+    def __init__(self, groups, tmx_path, mode, game_manager):
             self.groups = groups
             self.mode = mode 
+            self.game_manager = game_manager
             self.tmx_map = load_pygame(tmx_path)
             global GAME_WIDTH, GAME_HEIGHT
             GAME_WIDTH = self.tmx_map.width * TILE_SIZE
@@ -113,6 +115,7 @@ class Game:
             # === Game over: nhấn space để reset ===
             if self.is_game_over and event.key == pygame.K_SPACE:
                 self.reset()
+                self.game_manager.apply_volume()
             elif not self.is_paused:
                 self.snake.input(event)
 

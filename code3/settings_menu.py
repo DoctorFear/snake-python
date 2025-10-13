@@ -2,7 +2,7 @@ import pygame
 from button import Button
 from slider import Slider
 from gui import *
-from setting import WIDTH, HEIGHT, WHITE, GREY, GREEN
+from setting import WIDTH, HEIGHT, WHITE, BLACK
 import os
 
 class SettingsMenu:
@@ -13,72 +13,100 @@ class SettingsMenu:
         self.click_sound = pygame.mixer.Sound("data/sounds/tap.wav")
         self.click_sound.set_volume(0.3)
 
-        self.speed = 0.5
-        self.minus_btn = Button(WIDTH//2 - 180, 225, 30, 30, "-", "#4d4d4d", "#3a3a3a", font)
-        self.plus_btn = Button(WIDTH//2 + 140, 225, 30, 30, "+", "#4d4d4d", "#3a3a3a", font)
+        # Selected skin (Green hoặc Red)
+        self.selected_skin = "green"
 
-        self.slider = Slider(WIDTH//2 - 150, 350, 300)
-        self.back_btn = Button(40, 655, 140, 60, "Back", "#4d4d4d", "#3a3a3a", font)
+        # --- Skin boxes ---
+        box_size = 150
+        spacing = 40
+        left_center = WIDTH // 4
+        self.skin1_rect = pygame.Rect(left_center - box_size - spacing//2, HEIGHT//2 - 20, box_size, box_size)
+        self.skin2_rect = pygame.Rect(left_center + spacing//2, HEIGHT//2 - 20, box_size, box_size)
 
-        # --- Load texture viền ---
-        border_path = os.path.join("graphics", "objects", "items", "sandstone_carved.png")
-        try:
-            self.border_img = pygame.image.load(border_path).convert_alpha()
-            self.tile_size = self.border_img.get_width()
-            self.has_border = True
-        except Exception as e:
-            print(f"Không thể load texture viền: {e}")
-            # Nếu không tìm thấy texture, vẽ viền đơn giản
-            self.has_border = False
-            self.tile_size = 50
+        # --- Volume slider ---
+        slider_width = 350
+        self.slider = Slider(3*WIDTH//4 - slider_width//2, HEIGHT//2 + 80, slider_width, initial_value=self.game_manager.volume)
 
-    # def draw_border(self, screen):
-        """Vẽ viền vàng xung quanh khung menu"""
-        # if self.has_border:
-        #     for x in range(0, WIDTH, self.tile_size):
-        #         screen.blit(self.border_img, (x, 0))  # viền trên
-        #         screen.blit(self.border_img, (x, HEIGHT - self.tile_size))  # viền dưới
-        #     for y in range(0, HEIGHT, self.tile_size):
-        #         screen.blit(self.border_img, (0, y))  # viền trái
-        #         screen.blit(self.border_img, (WIDTH - self.tile_size, y))  # viền phải
-        # else:
-        #     # Vẽ viền đơn giản nếu không có texture
-        #     pygame.draw.rect(screen, (255, 215, 0), (0, 0, WIDTH, HEIGHT), 10)
+        # --- Back button ---
+        self.back_btn = Button(WIDTH//2 - 100, HEIGHT - 120, 200, 60, "Back", "#4d4d4d", "#3a3a3a", font)
 
     def draw(self, screen):
-        # --- Nền đen để đồng bộ giao diện ---
+        # --- Gradient background ---
         top_color = (0, 174, 239)
         bottom_color = (0, 114, 188)
         draw_gradient_background(screen, top_color, bottom_color)
+        #top_color = (255, 196, 140)   
+        #bottom_color = (179, 89, 0)   
+        #draw_gradient_background(screen, top_color, bottom_color)
 
-        # --- Vẽ viền ---
-        # self.draw_border(screen)
-
-        # --- Nội dung ---
+        # --- Fonts ---
         title_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 50)
-        title = title_font.render("Settings", True, (255, 255, 255))
-        screen.blit(title, (WIDTH//2 - title.get_width()//2, 100))
+        title1_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 35)
+        label_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 25)
 
-        speed_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 30)
-        speed_text = speed_font.render(f"Speed: {self.speed:.2f}", True, WHITE)
-        screen.blit(speed_text, (WIDTH//2 - speed_text.get_width()//2, 200))
+        # --- Tiêu đề Settings ---
+        title = render_text_with_shadow("Settings", title_font, WHITE, BLACK, shadow_offset=(0, 5))
+        screen.blit(title, (WIDTH//2 - title.get_width()//2, 50))
 
-        self.minus_btn.draw(screen)
-        self.plus_btn.draw(screen)
+        # --- Bên trái: Skin ---
+        skin_title = render_text_with_shadow("Skin", title1_font, WHITE, BLACK, shadow_offset=(0, 5))
+        skin_y = 200
+        screen.blit(skin_title, (WIDTH//4 - skin_title.get_width()//2, skin_y))
+
+        # --- Bên phải: Volume ---
+        vol_title = render_text_with_shadow("Volume", title1_font, WHITE, BLACK, shadow_offset=(0, 5))
+        screen.blit(vol_title, (3*WIDTH//4 - vol_title.get_width()//2, skin_y))
+
+        # --- Vẽ vạch ngăn ---
+        line_start_y = skin_y + 50  
+        line_end_y = HEIGHT - 200
+        pygame.draw.line(screen, WHITE, (WIDTH//2, line_start_y), (WIDTH//2, line_end_y), 5)
+
+        # --- Skin boxes ---
+        pygame.draw.rect(screen, WHITE, self.skin1_rect, border_radius=8)
+        pygame.draw.rect(screen, WHITE, self.skin2_rect, border_radius=8)
+
+        green_label = render_text_with_shadow("GREEN", label_font, WHITE, BLACK, shadow_offset=(0, 3))
+        red_label = render_text_with_shadow("RED", label_font, WHITE, BLACK, shadow_offset=(0, 3))
+
+        screen.blit(green_label, (self.skin1_rect.centerx - green_label.get_width()//2, self.skin1_rect.bottom + 15))
+        screen.blit(red_label, (self.skin2_rect.centerx - red_label.get_width()//2, self.skin2_rect.bottom + 15))
+
+        # --- Viền cho skin đang chọn ---
+        if self.selected_skin == "green":
+            pygame.draw.rect(screen, (0, 255, 0), self.skin1_rect, 6, border_radius=8)
+        else:
+            pygame.draw.rect(screen, (255, 0, 0), self.skin2_rect, 6, border_radius=8)
+
+        # --- Giá trị Volume ---
+        vol_value_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 35)
+        vol_text = render_text_with_shadow(f"{self.slider.value}%", vol_value_font, WHITE, BLACK, shadow_offset=(0, 4))
+        screen.blit(vol_text, (3*WIDTH//4 - vol_text.get_width()//2, HEIGHT//2 - 50))
+
+        # --- Vẽ Slider ---
         self.slider.draw(screen)
+
+        # --- Back button ---
         self.back_btn.draw(screen)
 
-        vol_text = speed_font.render(f"Volume: {self.slider.value}%", True, (255, 255, 255))
-        screen.blit(vol_text, (WIDTH//2 - vol_text.get_width()//2, 300))
-
     def handle_event(self, event):
+        # Chọn skin
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self.skin1_rect.collidepoint(event.pos):
+                self.selected_skin = "green"
+                self.click_sound.play()
+            elif self.skin2_rect.collidepoint(event.pos):
+                self.selected_skin = "red"
+                self.click_sound.play()
+
+        # Slider
+        old_value = self.slider.value
         self.slider.handle_event(event)
-        if self.minus_btn.is_clicked(event):
-            self.speed = max(0.05, self.speed - 0.05)
-            self.click_sound.play()
-        if self.plus_btn.is_clicked(event):
-            self.speed = min(1.0, self.speed + 0.05)
-            self.click_sound.play()
+        if self.slider.value != old_value:
+            self.game_manager.volume = self.slider.value
+            self.game_manager.apply_volume()
+
+        # Nút Back
         if self.back_btn.is_clicked(event):
             self.click_sound.play()
             self.game_manager.change_state("menu")
