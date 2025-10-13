@@ -4,8 +4,9 @@ from setting import TILE_SIZE
 from support import import_image
 
 class Snake(pygame.sprite.Sprite):
-    def __init__(self, pos, groups, game_width, game_height):
+    def __init__(self, pos, groups, game_width, game_height, mode):
         super().__init__(groups)
+        self.mode = mode
         self.game_width = game_width
         self.game_height = game_height
 
@@ -72,6 +73,10 @@ class Snake(pygame.sprite.Sprite):
         self.new_direction = self.direction
         self.score = 0 
 
+        self.speed_unlocked = False
+        self.show_unlock_message = False
+        self.unlock_message_timer = 0 
+
         # --- Animation ---
         self.frame_timer = 0
         self.frame_rate = 4  # 4 FPS (mỗi 0.25 giây đổi frame)
@@ -89,7 +94,8 @@ class Snake(pygame.sprite.Sprite):
             elif event.key == pygame.K_RIGHT and self.direction.x != -1:
                 self.new_direction = Vector2(1, 0)
             elif event.key == pygame.K_s:
-                self.speed_multiplier = 2.0
+                if self.speed_unlocked: 
+                    self.speed_multiplier = 2.0
             if self.new_direction != old_dir:
                 self.move_sound.stop()
                 self.move_sound.play()
@@ -120,6 +126,18 @@ class Snake(pygame.sprite.Sprite):
             self.head_image = pygame.transform.scale(self.head_images[self.current_head_frame], (TILE_SIZE, TILE_SIZE))
             self.tail_image = pygame.transform.scale(self.tail_images[self.current_tail_frame], (TILE_SIZE, TILE_SIZE))
             self.frame_timer = 0
+
+        if not self.speed_unlocked:
+            required = 10 if self.mode == 'easy' else 8
+            if self.score >= required:
+                self.speed_unlocked = True
+                self.show_unlock_message = True
+                self.unlock_message_timer = 3.0
+        
+        if self.show_unlock_message:
+            self.unlock_message_timer -= dt
+            if self.unlock_message_timer <= 0:
+                self.show_unlock_message = False
 
         # --- Cập nhật di chuyển ---
         self.time_since_move += dt

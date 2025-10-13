@@ -7,10 +7,12 @@ from sprite import Sprite
 from enemy import Enemy
 from pytmx.util_pygame import load_pygame
 from support import import_image
+from gui import render_text_with_shadow
 
 class Game:
     def __init__(self, groups, tmx_path, mode):
             self.groups = groups
+            self.mode = mode 
             self.tmx_map = load_pygame(tmx_path)
             global GAME_WIDTH, GAME_HEIGHT
             GAME_WIDTH = self.tmx_map.width * TILE_SIZE
@@ -49,7 +51,7 @@ class Game:
                 break
         if snake_spawn is None:
             snake_spawn = (WIDTH // 2, HEIGHT // 2)
-        self.snake = Snake(snake_spawn, self.groups, GAME_WIDTH, GAME_HEIGHT)
+        self.snake = Snake(snake_spawn, self.groups, GAME_WIDTH, GAME_HEIGHT, self.mode)
         self.food = Food(self.groups, self.snake, self.valid_positions)
 
     def get_valid_positions(self):
@@ -178,11 +180,18 @@ class Game:
         surface.blit(self.background, (0, 0))
         self.groups.draw(self.snake)
 
-        from gui import render_text_with_shadow  # Import hàm từ gui.py
+        
         font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 20)  # Font cho điểm số
         score_text = render_text_with_shadow(f'Score: {self.snake.score}', font, WHITE, BLACK, shadow_offset=(2, 2))  # Thêm bóng đổ
-        score_rect = score_text.get_rect(topleft=(20, 0))  # Vị trí góc trên bên trái (cách lề 10px)
+        score_rect = score_text.get_rect(topleft=(20, 0)) 
         surface.blit(score_text, score_rect)
+
+        # --- Thông báo unlock speed
+        if self.snake.show_unlock_message:
+            unlock_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 30)
+            unlock_text = render_text_with_shadow('Speed Boost Unlocked! Press S', unlock_font, WHITE, BLACK, shadow_offset=(2, 2))
+            unlock_rect = unlock_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 50))
+            surface.blit(unlock_text, unlock_rect)
 
         if self.enemy:
             self.enemy.draw_laser(surface)
