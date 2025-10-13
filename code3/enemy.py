@@ -7,19 +7,47 @@ from laser import Laser  # ✅ THÊM: Import class Laser
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, groups, snake, valid_positions, game_width, game_height):
         super().__init__(groups)
-        self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
-        self.image.fill((3, 53, 252))
+        # ✅ Load spritesheet (100x150px, mỗi frame 50x50px)
+        spritesheet = pygame.image.load('data/images/enemy.png').convert_alpha()
+        
+        # 5 frames xếp theo lưới 2 cột x 3 hàng
+        self.frames = []
+        frame_size = 50
+        positions = [
+            (0, 0),    # Frame 0: cột 0, hàng 0
+            (50, 0),   # Frame 1: cột 1, hàng 0
+            (0, 50),   # Frame 2: cột 0, hàng 1
+            (50, 50),  # Frame 3: cột 1, hàng 1
+            (0, 100)   # Frame 4: cột 0, hàng 2
+        ]
+        
+        for x, y in positions:
+            frame_rect = pygame.Rect(x, y, frame_size, frame_size)
+            frame = spritesheet.subsurface(frame_rect)
+            frame = pygame.transform.scale(frame, (TILE_SIZE, TILE_SIZE))
+            self.frames.append(frame)
+        
+        self.current_frame = 0
+        self.animation_speed = 0.1
+        self.animation_timer = 0
+        self.image = self.frames[0]
+
         self.rect = self.image.get_rect()
         self.snake = snake
         self.valid_positions = valid_positions
         self.game_width = game_width
         self.game_height = game_height
         
-        # ✅ SỬA: Thay vì các thuộc tính laser riêng lẻ, dùng object Laser
+        #SỬA: Thay vì các thuộc tính laser riêng lẻ, dùng object Laser
         self.laser = None  # Sẽ được khởi tạo sau khi spawn
         self.spawn_time = pygame.time.get_ticks()
         self.laser_fired = False
-        
+
+        # ✅ Thêm dấu chấm than nhấp nháy
+        self.warning_blink = 0
+        self.warning_visible = True
+        self.warning_blink_speed = 0.2  # Nhấp nháy mỗi 0.2 giây
+
         self.spawn_at_edge_near_tail()
     
     def spawn_at_edge_near_tail(self):
@@ -87,6 +115,14 @@ class Enemy(pygame.sprite.Sprite):
     def update(self, dt):
         """Kiểm tra sau 3 giây thì bắn laser"""
         elapsed = (pygame.time.get_ticks() - self.spawn_time) / 1000
+
+        # ✅ Cập nhật nhấp nháy dấu chấm than (chỉ trước khi bắn)
+        if elapsed < 3:
+            self.warning_blink += dt
+            if self.warning_blink >= self.warning_blink_speed:
+                self.warning_blink = 0
+                self.warning_visible = not self.warning_visible
+
         if elapsed >= 3 and not self.laser_fired:
             # Kích hoạt laser
             self.laser.activate()
@@ -95,11 +131,31 @@ class Enemy(pygame.sprite.Sprite):
         #laser để nó bắn ra từ từ
         if self.laser:
             self.laser.update(dt)
-    
+
+        # ✅ Animation từ spritesheet
+        self.animation_timer += dt
+        if self.animation_timer >= self.animation_speed:
+            self.animation_timer = 0
+            self.current_frame = (self.current_frame + 1) % len(self.frames)
+            self.image = self.frames[self.current_frame]
+
     def draw_laser(self, surface, camera_offset=(0, 0)):
         """Vẽ laser trên màn hình"""
         if self.laser:
             self.laser.draw(surface, camera_offset)
+            
+    def draw_warning(self, surface, camera_offset=(0, 0)):
+        #Vẽ dấu chấm than cảnh báo phía trên enemy
+        elapsed = (pygame.time.get_ticks() - self.spawn_time) / 1000
+        if elapsed < 3 and self.warning_visible:
+            warning_x = self.rect.x - camera_offset[0] + TILE_SIZE // 2
+            warning_y = self.rect.y - camera_offset[1] - 20
+            
+            font = pygame.font.Font(None, 60)
+            warning_text = font.render("!", True, (255, 0, 0))
+            warning_rect = warning_text.get_rect(center=(warning_x, warning_y))
+            surface.blit(warning_text, warning_rect)
+    
     
     def check_collision_with_snake(self, snake):
         """Kiểm tra va chạm giữa snake với enemy hoặc laser"""

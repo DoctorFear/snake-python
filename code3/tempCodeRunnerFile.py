@@ -1,6 +1,2 @@
 
-    pygame.quit()
-    sys.exit()
-
-if __name__ == "__main__":
-    main()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))

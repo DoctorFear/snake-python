@@ -178,33 +178,40 @@ class Game:
 
     def draw(self, surface):
         surface.blit(self.background, (0, 0))
-        self.groups.draw(self.snake)
 
-        
-        font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 20)  # Font cho điểm số
-        score_text = render_text_with_shadow(f'Score: {self.snake.score}', font, WHITE, BLACK, shadow_offset=(2, 2))  # Thêm bóng đổ
-        score_rect = score_text.get_rect(topleft=(20, 0)) 
-        surface.blit(score_text, score_rect)
-
-        # --- Thông báo unlock speed
-        if self.snake.show_unlock_message:
-            unlock_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 30)
-            unlock_text = render_text_with_shadow('Speed Boost Unlocked! Press S', unlock_font, WHITE, BLACK, shadow_offset=(2, 2))
-            unlock_rect = unlock_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 50))
-            surface.blit(unlock_text, unlock_rect)
+        self.snake.draw(surface)
+        surface.blit(self.food.image, self.food.rect)
 
         if self.enemy:
             self.enemy.draw_laser(surface)
+            surface.blit(self.enemy.image, self.enemy.rect)
+            self.enemy.draw_warning(surface)
 
-        # Vẽ menu pause
+        font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 20)
+        score_text = render_text_with_shadow(
+            f'Score: {self.snake.score}', font, WHITE, BLACK, shadow_offset=(2, 2)
+        )
+        surface.blit(score_text, (20, 0))
+
+        if self.snake.show_unlock_message:
+            unlock_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 30)
+            unlock_text = render_text_with_shadow(
+                'Speed Boost Unlocked! Press S',
+                unlock_font, WHITE, BLACK, shadow_offset=(2, 2)
+            )
+            unlock_rect = unlock_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 50))
+            surface.blit(unlock_text, unlock_rect)
+
         if self.is_paused:
             self.draw_pause_menu(surface)
 
         if self.is_game_over:
-            font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 50)  # Font cho Game Over
-            text_surface = render_text_with_shadow('Game Over! Press Space', font, WHITE, BLACK, shadow_offset=(3, 3))  # Bóng đổ
-            text_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-            surface.blit(text_surface, text_rect)
+            font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 50)
+            text_surface = render_text_with_shadow(
+                'Game Over! Press Space', font, WHITE, BLACK, shadow_offset=(3, 3)
+            )
+            surface.blit(text_surface, text_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
+
 
     # Hàm vẽ menu pause
     def draw_pause_menu(self, surface):
