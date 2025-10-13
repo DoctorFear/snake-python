@@ -178,6 +178,12 @@ class Game:
         surface.blit(self.background, (0, 0))
         self.groups.draw(self.snake)
 
+        from gui import render_text_with_shadow  # Import hàm từ gui.py
+        font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 20)  # Font cho điểm số
+        score_text = render_text_with_shadow(f'Score: {self.snake.score}', font, WHITE, BLACK, shadow_offset=(2, 2))  # Thêm bóng đổ
+        score_rect = score_text.get_rect(topleft=(20, 0))  # Vị trí góc trên bên trái (cách lề 10px)
+        surface.blit(score_text, score_rect)
+
         if self.enemy:
             self.enemy.draw_laser(surface)
 
@@ -186,8 +192,8 @@ class Game:
             self.draw_pause_menu(surface)
 
         if self.is_game_over:
-            font = pygame.font.SysFont('Arial', 50)
-            text_surface = font.render('Game Over! Press Space', True, RED)
+            font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 50)  # Font cho Game Over
+            text_surface = render_text_with_shadow('Game Over! Press Space', font, WHITE, BLACK, shadow_offset=(3, 3))  # Bóng đổ
             text_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2))
             surface.blit(text_surface, text_rect)
 
