@@ -64,7 +64,7 @@ class Game:
                 break
         if snake_spawn is None:
             snake_spawn = (WIDTH // 2, HEIGHT // 2)
-        self.snake = Snake(snake_spawn, self.groups, GAME_WIDTH, GAME_HEIGHT, self.mode, self.game_manager)
+        self.snake = Snake(snake_spawn, self.groups, GAME_WIDTH, GAME_HEIGHT, self.mode, self.game_manager, skin=self.game_manager.selected_skin)
         self.food = Food(self.groups, self.snake, self.valid_positions)
 
     def get_valid_positions(self):

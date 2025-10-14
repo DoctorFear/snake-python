@@ -18,8 +18,9 @@ class SettingsMenu:
         box_size = 150
         spacing = 40
         left_center = WIDTH // 4
-        self.skin1_rect = pygame.Rect(left_center - box_size - spacing//2, HEIGHT//2 - 20, box_size, box_size)
-        self.skin2_rect = pygame.Rect(left_center + spacing//2, HEIGHT//2 - 20, box_size, box_size)
+        skin_y = HEIGHT // 2 - box_size // 2 - 50  # Điều chỉnh để căn giữa tốt hơn sau khi thêm ảnh
+        self.skin1_rect = pygame.Rect(left_center - box_size - spacing//2, skin_y, box_size, box_size)
+        self.skin2_rect = pygame.Rect(left_center + spacing//2, skin_y, box_size, box_size)
 
         # --- Load ảnh skin (giữ trong suốt) ---
         self.green_skin = pygame.image.load("data/images/green_dragon.png").convert_alpha()
@@ -41,8 +42,9 @@ class SettingsMenu:
 
         # --- Volume slider ---
         slider_width = 350
-        self.music_slider = Slider(3*WIDTH//4 - slider_width//2, HEIGHT//2 - 20, slider_width, initial_value=self.game_manager.music_volume)
-        self.sfx_slider = Slider(3*WIDTH//4 - slider_width//2, HEIGHT//2 + 100, slider_width, initial_value=self.game_manager.sfx_volume)
+        slider_y_start = skin_y + box_size + 50  # Điều chỉnh để dưới box skin
+        self.music_slider = Slider(3*WIDTH//4 - slider_width//2, slider_y_start, slider_width, initial_value=self.game_manager.music_volume)
+        self.sfx_slider = Slider(3*WIDTH//4 - slider_width//2, slider_y_start + 120, slider_width, initial_value=self.game_manager.sfx_volume)
         # --- Back button ---
         self.back_btn = Button(WIDTH//2 - 100, HEIGHT - 120, 200, 60, "Back", "#4d4d4d", "#3a3a3a", font)
 
@@ -61,20 +63,24 @@ class SettingsMenu:
         screen.blit(title, (WIDTH//2 - title.get_width()//2, 50))
 
         # === Bên trái: Skin ===
-        skin_y = 200
+        skin_title_y = 200
         skin_title = render_text_with_shadow("Skin", title1_font, WHITE, BLACK, shadow_offset=(0, 5))
-        screen.blit(skin_title, (WIDTH//4 - skin_title.get_width()//2, skin_y))
+        screen.blit(skin_title, (WIDTH//4 - skin_title.get_width()//2, skin_title_y))
 
         # === Bên phải: Volume (cao ngang Skin) ===
         vol_title = render_text_with_shadow("Volume", title1_font, WHITE, BLACK, shadow_offset=(0, 5))
-        screen.blit(vol_title, (3*WIDTH//4 - vol_title.get_width()//2, skin_y))
+        screen.blit(vol_title, (3*WIDTH//4 - vol_title.get_width()//2, skin_title_y))
 
         # --- Vẽ vạch ngăn ---
-        pygame.draw.line(screen, WHITE, (WIDTH//2, skin_y + 50), (WIDTH//2, HEIGHT - 200), 5)
+        pygame.draw.line(screen, WHITE, (WIDTH//2, skin_title_y + 50), (WIDTH//2, HEIGHT - 200), 5)
 
         # === SKIN BOXES ===
         pygame.draw.rect(screen, WHITE, self.skin1_rect, border_radius=8)
         pygame.draw.rect(screen, WHITE, self.skin2_rect, border_radius=8)
+
+        # Hiển thị ảnh skin bên trong box
+        screen.blit(self.green_skin, self.skin1_rect.topleft)
+        screen.blit(self.red_skin, self.skin2_rect.topleft)
 
         # --- Label ---
         green_label = render_text_with_shadow("GREEN", label_font, WHITE, BLACK, shadow_offset=(0, 3))
@@ -90,7 +96,7 @@ class SettingsMenu:
         # === Volume sliders ===
         # Music label & slider
         music_label = render_text_with_shadow("Music", label_font, WHITE, BLACK, shadow_offset=(0, 3))
-        music_label_y = skin_y + 110
+        music_label_y = skin_title_y + 110
         screen.blit(music_label, (3*WIDTH//4 - music_label.get_width()//2, music_label_y))
         self.music_slider.rect.y = music_label_y + 70 
         self.music_slider.draw(screen)
@@ -113,9 +119,11 @@ class SettingsMenu:
             if self.skin1_rect.collidepoint(event.pos):
                 self.selected_skin = "green"
                 self.click_sound.play()
+                self.game_manager.selected_skin = "green"  # Áp dụng skin như code A
             elif self.skin2_rect.collidepoint(event.pos):
                 self.selected_skin = "red"
                 self.click_sound.play()
+                self.game_manager.selected_skin = "red"  # Áp dụng skin như code A
 
         # Music slider
         old_music = self.music_slider.value
@@ -134,4 +142,8 @@ class SettingsMenu:
         # Back button
         if self.back_btn.is_clicked(event):
             self.click_sound.play()
-            self.game_manager.change_state("menu")
+            # Nếu đang trong trò chơi, reset game để áp dụng skin mới (như code A)
+            if self.game_manager.state == "game" and self.game_manager.game:
+                self.game_manager.change_state("game")
+            else:
+                self.game_manager.change_state("menu")

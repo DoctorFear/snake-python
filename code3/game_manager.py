@@ -26,6 +26,9 @@ class GameManager:
         self.mode_selector = GameModeSelector(self)
         self.game = None  # chỉ khởi tạo khi vào game
 
+        self.selected_skin = "green" # Mặc định là skin xanh lá
+
+
     def apply_volume(self):
         """Áp dụng âm lượng cho pygame mixer"""
         pygame.mixer.music.set_volume(self.music_volume / 100.0)

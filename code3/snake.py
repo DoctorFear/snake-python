@@ -4,16 +4,18 @@ from setting import TILE_SIZE
 from support import import_image
 
 class Snake(pygame.sprite.Sprite):
-    def __init__(self, pos, groups, game_width, game_height, mode, game_manager):
+    def __init__(self, pos, groups, game_width, game_height, mode, game_manager, skin):
         super().__init__(groups)
         self.mode = mode
         self.game_width = game_width
         self.game_height = game_height
         self.game_manager = game_manager
+        self.skin = skin
+        copy_suffix = " - Copy" if self.skin == "red" else ""
 
         # --- Load ảnh đầu (4 frame) ---
         self.head_images = [
-            import_image('data', 'images', 'head', f'head_{i+1}', alpha=True)
+            import_image('data', 'images', 'head', f'head_{i+1}{copy_suffix}', alpha=True)
             for i in range(4)
         ]
         self.current_head_frame = 0
@@ -21,7 +23,7 @@ class Snake(pygame.sprite.Sprite):
 
         # --- Load ảnh đuôi (4 frame) ---
         self.tail_images = [
-            import_image('data', 'images', 'tail', f'tail_{i+1}', alpha=True)
+            import_image('data', 'images', 'tail', f'tail_{i+1}{copy_suffix}', alpha=True)
             for i in range(4)
         ]
         self.current_tail_frame = 0
@@ -29,7 +31,7 @@ class Snake(pygame.sprite.Sprite):
 
         # --- Load ảnh thân (4 frame) ---
         self.body_images = [
-            import_image('data', 'images', 'body', f'body_{i+1}', alpha=True)
+            import_image('data', 'images', 'body', f'body_{i+1}{copy_suffix}', alpha=True)
             for i in range(4)
         ]
         self.current_body_frame = 0
@@ -41,14 +43,14 @@ class Snake(pygame.sprite.Sprite):
         # --- Load ảnh góc ---
         self.corner_images = {}
         corner_configs = [
-            ('right_to_up', '1a'),
-            ('up_to_right', '2a'),
-            ('up_to_left', '3a'),
-            ('left_to_up', '4a'),
-            ('left_to_down', '5a'),
-            ('down_to_left', '6a'),
-            ('down_to_right', '7a'),
-            ('right_to_down', '8a')
+            ('right_to_up', f'1a{copy_suffix}'),
+            ('up_to_right', f'2a{copy_suffix}'),
+            ('up_to_left', f'3a{copy_suffix}'),
+            ('left_to_up', f'4a{copy_suffix}'),
+            ('left_to_down', f'5a{copy_suffix}'),
+            ('down_to_left', f'6a{copy_suffix}'),
+            ('down_to_right', f'7a{copy_suffix}'),
+            ('right_to_down', f'8a{copy_suffix}')
         ]
         for name, file_name in corner_configs:
             self.corner_images[name] = pygame.transform.scale(
