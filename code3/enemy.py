@@ -2,33 +2,36 @@ import pygame
 import random
 from setting import TILE_SIZE, GAME_WIDTH, GAME_HEIGHT
 from pygame.math import Vector2
-from laser import Laser  # ✅ THÊM: Import class Laser
+from laser import Laser
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, groups, snake, valid_positions, game_width, game_height):
+    def __init__(self, groups, snake, valid_positions, game_width, game_height, mode):
         super().__init__(groups)
-        # ✅ Load spritesheet (100x150px, mỗi frame 50x50px)
-        spritesheet = pygame.image.load('data/images/enemy.png').convert_alpha()
         
-        # 5 frames xếp theo lưới 2 cột x 3 hàng
-        self.frames = []
+        self.mode = mode
+        image_file = 'data/images/enemies/enemy1.png' if mode == 'easy' else 'data/images/enemies/enemy2.png'
+        spritesheet = pygame.image.load(image_file).convert_alpha()
+        
+        # 4 frames xếp theo lưới 2 cột x 2 hàng
+        self.original_frames = []
         frame_size = 50
         positions = [
             (0, 0),    # Frame 0: cột 0, hàng 0
             (50, 0),   # Frame 1: cột 1, hàng 0
             (0, 50),   # Frame 2: cột 0, hàng 1
             (50, 50),  # Frame 3: cột 1, hàng 1
-            (0, 100)   # Frame 4: cột 0, hàng 2
         ]
         
         for x, y in positions:
             frame_rect = pygame.Rect(x, y, frame_size, frame_size)
             frame = spritesheet.subsurface(frame_rect)
             frame = pygame.transform.scale(frame, (TILE_SIZE, TILE_SIZE))
-            self.frames.append(frame)
+            self.original_frames.append(frame)
         
+        # Frames hiện tại (có thể bị xoay nếu là enemy2)
+        self.frames = self.original_frames.copy()
         self.current_frame = 0
-        self.animation_speed = 0.1
+        self.animation_speed = 0.2
         self.animation_timer = 0
         self.image = self.frames[0]
 
@@ -38,80 +41,48 @@ class Enemy(pygame.sprite.Sprite):
         self.game_width = game_width
         self.game_height = game_height
         
-        #SỬA: Thay vì các thuộc tính laser riêng lẻ, dùng object Laser
-        self.laser = None  # Sẽ được khởi tạo sau khi spawn
+        self.laser = None
         self.spawn_time = pygame.time.get_ticks()
         self.laser_fired = False
 
-        # ✅ Thêm dấu chấm than nhấp nháy
+        # Thêm dấu chấm than nhấp nhấy
         self.warning_blink = 0
         self.warning_visible = True
-        self.warning_blink_speed = 0.2  # Nhấp nháy mỗi 0.2 giây
+        self.warning_blink_speed = 0.2
 
-        self.spawn_at_edge_near_tail()
+        self.spawn_at_edge()
     
-    def spawn_at_edge_near_tail(self):
+    def spawn_at_edge(self):
+        """Spawn enemy ở viền gần đuôi snake"""
         tail_pos = self.snake.body[-1]
-        map_w, map_h = int(self.game_width / TILE_SIZE), int(self.game_height / TILE_SIZE)
+        map_w = int(self.game_width / TILE_SIZE)
+        map_h = int(self.game_height / TILE_SIZE)
 
+        # Xác định hướng di chuyển của đuôi
         if len(self.snake.body) > 1:
             prev_tail = self.snake.body[-2]
             direction = tail_pos - prev_tail
         else:
             direction = Vector2(0, 1)
 
-        # Kiểm tra xem đuôi rồng có ở rìa map không
-        tail_at_left = tail_pos.x <= 1
-        tail_at_right = tail_pos.x >= map_w - 2
-        tail_at_top = tail_pos.y <= 1
-        tail_at_bottom = tail_pos.y >= map_h - 2
-
         # Chọn rìa tương ứng và xác định hướng laser
         laser_direction = Vector2(0, 0)
         if abs(direction.x) > abs(direction.y):
             if direction.x > 0:
-                # Đuôi đang ở rìa phải -> spawn bên trái
-                if tail_at_right:
-                    spawn_pos = Vector2(0, tail_pos.y)
-                    offset = Vector2(1, 0)
-                    laser_direction = Vector2(1, 0)  # Bắn sang phải
-                else:
-                    spawn_pos = Vector2(map_w - 1, tail_pos.y)
-                    offset = Vector2(-1, 0)
-                    laser_direction = Vector2(-1, 0)  # Bắn sang trái
+                spawn_pos = Vector2(map_w - 1, tail_pos.y)
+                laser_direction = Vector2(-1, 0)  # Bắn sang trái
             else:
-                # Đuôi đang ở rìa trái -> spawn bên phải
-                if tail_at_left:
-                    spawn_pos = Vector2(map_w - 1, tail_pos.y)
-                    offset = Vector2(-1, 0)
-                    laser_direction = Vector2(-1, 0)  # Bắn sang trái
-                else:
-                    spawn_pos = Vector2(0, tail_pos.y)
-                    offset = Vector2(1, 0)
-                    laser_direction = Vector2(1, 0)  # Bắn sang phải
+                spawn_pos = Vector2(0, tail_pos.y)
+                laser_direction = Vector2(1, 0)  # Bắn sang phải
         else:
             if direction.y > 0:
-                # Đuôi đang ở rìa dưới -> spawn bên trên
-                if tail_at_bottom:
-                    spawn_pos = Vector2(tail_pos.x, 0)
-                    offset = Vector2(0, 1)
-                    laser_direction = Vector2(0, 1)  # Bắn xuống dưới
-                else:
-                    spawn_pos = Vector2(tail_pos.x, map_h - 1)
-                    offset = Vector2(0, -1)
-                    laser_direction = Vector2(0, -1)  # Bắn lên trên
+                spawn_pos = Vector2(tail_pos.x, map_h - 1)
+                laser_direction = Vector2(0, -1)  # Bắn lên trên
             else:
-                # Đuôi đang ở rìa trên -> spawn bên dưới
-                if tail_at_top:
-                    spawn_pos = Vector2(tail_pos.x, map_h - 1)
-                    offset = Vector2(0, -1)
-                    laser_direction = Vector2(0, -1)  # Bắn lên trên
-                else:
-                    spawn_pos = Vector2(tail_pos.x, 0)
-                    offset = Vector2(0, 1)
-                    laser_direction = Vector2(0, 1)  # Bắn xuống dưới
+                spawn_pos = Vector2(tail_pos.x, 0)
+                laser_direction = Vector2(0, 1)  # Bắn xuống dưới
 
-        # Nếu vị trí không hợp lệ
+        # Nếu vị trí không hợp lệ, chọn random từ viền
         if spawn_pos not in self.valid_positions or spawn_pos in self.snake.body:
             edges = []
             for x in range(map_w):
@@ -123,7 +94,6 @@ class Enemy(pygame.sprite.Sprite):
             edges = [pos for pos in edges if pos in self.valid_positions and pos not in self.snake.body]
             if edges:
                 spawn_pos = random.choice(edges)
-                offset = Vector2(0, 0)
                 # Xác định hướng laser dựa trên vị trí spawn
                 if spawn_pos.x == 0:
                     laser_direction = Vector2(1, 0)
@@ -134,19 +104,60 @@ class Enemy(pygame.sprite.Sprite):
                 else:
                     laser_direction = Vector2(0, -1)
 
-        # Xích vào trong 1 tile
-        spawn_pos += offset
+        # Nếu là tàu ngầm (enemy2), xích vào trong 1 tile
+        if self.mode == 'hard':
+            if spawn_pos.x == 0:
+                spawn_pos += Vector2(1, 0)
+            elif spawn_pos.x == map_w - 1:
+                spawn_pos += Vector2(-1, 0)
+            elif spawn_pos.y == 0:
+                spawn_pos += Vector2(0, 1)
+            elif spawn_pos.y == map_h - 1:
+                spawn_pos += Vector2(0, -1)
+        
         self.grid_pos = spawn_pos
         self.rect.topleft = (spawn_pos.x * TILE_SIZE, spawn_pos.y * TILE_SIZE)
         
-        #Khởi tạo object Laser
+        # Xoay enemy2 (tàu ngầm) theo hướng spawn
+        if self.mode == 'hard':
+            self.rotate_submarine(spawn_pos, map_w, map_h)
+        
+        # Khởi tạo object Laser
         self.laser = Laser(self.grid_pos, laser_direction, self.game_width, self.game_height, speed=30)
+    
+    def rotate_submarine(self, spawn_pos, map_w, map_h):
+        """Xoay tàu ngầm theo vị trí spawn"""
+        angle = 0
+        flip_x = False
+        
+         # Rìa trái (x = 1) -> quay sang phải (cần flip)
+        if spawn_pos.x == 1:
+            flip_x = True
+        # Rìa phải (x = map_w - 2) -> quay sang trái (giữ nguyên)
+        elif spawn_pos.x == map_w - 2:
+            flip_x = False
+        # Rìa trên (y = 1) -> quay sang dưới (giữ nguyên)
+        elif spawn_pos.y == 1:
+            flip_x = False 
+        # Rìa dưới (y = map_h - 2) -> quay sang trên (giữ nguyên)
+        elif spawn_pos.y == map_h - 2:
+            flip_x = False
+        
+        rotated_frames = []
+        for frame in self.original_frames:
+            rotated = pygame.transform.rotate(frame, angle)
+            if flip_x:
+                rotated = pygame.transform.flip(rotated, True, False)
+            rotated_frames.append(rotated)
+        
+        self.frames = rotated_frames
+        self.image = self.frames[self.current_frame]
     
     def update(self, dt):
         """Kiểm tra sau 3 giây thì bắn laser"""
         elapsed = (pygame.time.get_ticks() - self.spawn_time) / 1000
 
-        # ✅ Cập nhật nhấp nháy dấu chấm than (chỉ trước khi bắn)
+        # Cập nhật nhấp nháy dấu chấm than (chỉ trước khi bắn)
         if elapsed < 3:
             self.warning_blink += dt
             if self.warning_blink >= self.warning_blink_speed:
@@ -158,11 +169,11 @@ class Enemy(pygame.sprite.Sprite):
             self.laser.activate()
             self.laser_fired = True
         
-        #laser để nó bắn ra từ từ
+        # laser để nó bắn ra từ từ
         if self.laser:
             self.laser.update(dt)
 
-        # ✅ Animation từ spritesheet
+        # Animation từ spritesheet
         self.animation_timer += dt
         if self.animation_timer >= self.animation_speed:
             self.animation_timer = 0
@@ -175,7 +186,7 @@ class Enemy(pygame.sprite.Sprite):
             self.laser.draw(surface, camera_offset)
             
     def draw_warning(self, surface, camera_offset=(0, 0)):
-        #Vẽ dấu chấm than cảnh báo phía trên enemy
+        """Vẽ dấu chấm than cảnh báo phía trên enemy"""
         elapsed = (pygame.time.get_ticks() - self.spawn_time) / 1000
         if elapsed < 3 and self.warning_visible:
             warning_x = self.rect.x - camera_offset[0] + TILE_SIZE // 2
@@ -186,7 +197,6 @@ class Enemy(pygame.sprite.Sprite):
             warning_rect = warning_text.get_rect(center=(warning_x, warning_y))
             surface.blit(warning_text, warning_rect)
     
-    
     def check_collision_with_snake(self, snake):
         """Kiểm tra va chạm giữa snake với enemy hoặc laser"""
         
@@ -195,7 +205,7 @@ class Enemy(pygame.sprite.Sprite):
             if body_part == self.grid_pos:
                 return True
         
-        #Kiểm tra va chạm với laser
+        # Kiểm tra va chạm với laser
         if self.laser and self.laser.check_collision_with_body(snake.body):
             return True
         

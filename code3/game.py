@@ -165,7 +165,8 @@ class Game:
             if self.snake.score % 5 == 0:
                 self.enemy = Enemy(self.groups, self.snake, self.valid_positions,
                                    self.tmx_map.width * TILE_SIZE,
-                                   self.tmx_map.height * TILE_SIZE)
+                                   self.tmx_map.height * TILE_SIZE,
+                                   self.mode)
                 self.enemy_spawn_time = pygame.time.get_ticks()
                 self.enemy_active = True
 
@@ -185,7 +186,7 @@ class Game:
         if self.is_paused or self.is_game_over:
             return
 
-        self.food.update()
+        self.food.update(dt)
         self.is_game_over = self.snake.update(dt, self.food, self.walls)
         
         if self.is_game_over:
