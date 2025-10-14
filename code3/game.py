@@ -22,10 +22,16 @@ class Game:
             pygame.mixer.init()
             self.collect_sound = pygame.mixer.Sound("data/sounds/collect.wav")
             self.dead_sound = pygame.mixer.Sound("data/sounds/dead_1.wav")
+            self.click_sound = pygame.mixer.Sound("data/sounds/tap.wav")
+            # Apply volume
+            self.collect_sound.set_volume(self.game_manager.sfx_volume / 100)
+            self.dead_sound.set_volume(self.game_manager.sfx_volume / 100)
+            self.click_sound.set_volume(self.game_manager.sfx_volume / 100)    
+
             self.music_file = "data/sounds/pixel-song.wav"
             pygame.mixer.music.load(self.music_file)
             pygame.mixer.music.play(-1)
-            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.set_volume(self.game_manager.music_volume / 100)
 
             self.valid_positions = self.get_valid_positions()
             self.walls = []
@@ -40,7 +46,7 @@ class Game:
 
             # === Pause Menu ===
             self.is_paused = False
-            self.menu_options = ["resume", "leave"]
+            self.menu_options = ["resume", "restart", "leave"]
             self.selected_index = 0  # Mặc định chọn resume
 
             # === Game Over Menu ===
@@ -58,7 +64,7 @@ class Game:
                 break
         if snake_spawn is None:
             snake_spawn = (WIDTH // 2, HEIGHT // 2)
-        self.snake = Snake(snake_spawn, self.groups, GAME_WIDTH, GAME_HEIGHT, self.mode)
+        self.snake = Snake(snake_spawn, self.groups, GAME_WIDTH, GAME_HEIGHT, self.mode, self.game_manager)
         self.food = Food(self.groups, self.snake, self.valid_positions)
 
     def get_valid_positions(self):
@@ -88,8 +94,6 @@ class Game:
         return walls
 
     def handle_input(self, event):
-        self.click_sound = pygame.mixer.Sound("data/sounds/tap.wav")
-
         # === ƯU TIÊN KIỂM TRA GAME OVER MENU TRƯỚC ===
         if self.is_game_over:
             if event.type == pygame.KEYDOWN:
@@ -131,10 +135,16 @@ class Game:
                     if selected == "resume":
                         self.is_paused = False
                         pygame.mixer.music.unpause()
+                    elif selected == "restart":
+                        self.reset()
+                        self.game_manager.apply_volume()
+                        self.is_paused = False
+                        pygame.mixer.music.unpause()
                     elif selected == "leave":
                         pygame.mixer.music.stop()
                         return "menu"
                 return
+
 
             # === Điều khiển rắn bình thường ===
             self.snake.input(event)
@@ -180,7 +190,6 @@ class Game:
         
         if self.is_game_over:
             self.dead_sound.play()
-            self.dead_sound.set_volume(0.8)
             pygame.mixer.music.stop()
 
         self.check_collisions()
@@ -190,7 +199,6 @@ class Game:
             if self.enemy.check_collision_with_snake(self.snake):
                 self.is_game_over = True
                 self.dead_sound.play()
-                self.dead_sound.set_volume(0.8)
                 pygame.mixer.music.stop()
             
             elapsed = (pygame.time.get_ticks() - self.enemy_spawn_time) / 1000
@@ -245,7 +253,7 @@ class Game:
         overlay.fill((0, 0, 0))
         surface.blit(overlay, (0, 0))
 
-        # Load custom font with fallback
+        # Font
         try:
             title_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 60)
             btn_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 40)
@@ -258,26 +266,24 @@ class Game:
         title = title_font.render('GAME PAUSED', True, (255, 255, 255))
         surface.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 120)))
 
-        # Menu options
+        # Vẽ từng lựa chọn trong menu
         for i, name in enumerate(self.menu_options):
             color = (255, 255, 255) if i == self.selected_index else (180, 180, 180)
             text = btn_font.render(name.capitalize(), True, color)
             text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + i * 80))
             surface.blit(text, text_rect)
 
-            # Vẽ mũi tên vàng bên trái (đã xoay 180°)
+            # Vẽ mũi tên trắng bên trái cho mục được chọn
             if i == self.selected_index:
-                size = 25  # kích thước mũi tên
+                size = 25
                 arrow_y = text_rect.centery + 6
-
-                # Cố định cột x cho mũi tên (ví dụ cách giữa màn hình 150px)
                 arrow_x = WIDTH // 2 - 150
-
                 pygame.draw.polygon(surface, (255, 255, 255), [
                     (arrow_x, arrow_y),
                     (arrow_x - size, arrow_y - size * 0.7),
                     (arrow_x - size, arrow_y + size * 0.7)
                 ])
+
 
     def draw_game_over_menu(self, surface):
         overlay = pygame.Surface((WIDTH, HEIGHT))

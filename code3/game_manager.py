@@ -14,7 +14,8 @@ class GameManager:
         self.selected_mode = "easy"  # easy hoặc hard
         
         # --- Cài đặt game ---
-        self.volume = 50  # Âm lượng (0 - 100)
+        self.music_volume = 50  # 0-100
+        self.sfx_volume = 50    # 0-100
 
         # --- Các thành phần ---
         self.all_sprites = AllSprites()
@@ -27,22 +28,40 @@ class GameManager:
 
     def apply_volume(self):
         """Áp dụng âm lượng cho pygame mixer"""
-        pygame.mixer.music.set_volume(self.volume / 100.0)
+        pygame.mixer.music.set_volume(self.music_volume / 100.0)
         # Áp dụng cho sound effects nếu game đang chạy
         if self.game:
-            self.game.collect_sound.set_volume(self.volume / 100.0)
-            self.game.dead_sound.set_volume(self.volume / 100.0)
+            self.game.collect_sound.set_volume(self.sfx_volume / 100.0)
+            self.game.dead_sound.set_volume(self.sfx_volume / 100.0)
 
     def change_state(self, new_state):
-        """Chuyển trạng thái game"""
+        """Chuyển trạng thái game mà không reset nhạc menu mỗi lần"""
+        # Nếu vào game → dừng nhạc menu và khởi động game
         if new_state == "game":
             self.all_sprites = AllSprites()
-            # Chọn map dựa trên selected_mode
-            map_path = 'data/levels/222 copy.tmx' if self.selected_mode == "easy" else 'data/levels/222.tmx'
+
+            map_path = (
+                'data/levels/222 copy.tmx'
+                if self.selected_mode == "easy"
+                else 'data/levels/222.tmx'
+            )
+
             self.game = Game(self.all_sprites, map_path, mode=self.selected_mode, game_manager=self)
-            # Áp dụng âm lượng cho game mới
             self.apply_volume()
+
+        else:
+            # Nếu chuyển giữa các menu với nhau (menu, settings, mode select)
+            # thì chỉ phát nhạc nếu nó chưa chạy
+            if not pygame.mixer.music.get_busy():
+                pygame.mixer.music.load("data/sounds/theme.wav")
+                pygame.mixer.music.play(-1)
+                pygame.mixer.music.set_volume(self.music_volume / 100)
+            else:
+                # Nếu nhạc menu đang chạy rồi thì chỉ chỉnh lại volume cho đúng
+                pygame.mixer.music.set_volume(self.music_volume / 100)
+
         self.state = new_state
+
 
     def handle_event(self, event):
         """Xử lý sự kiện dựa trên trạng thái hiện tại"""

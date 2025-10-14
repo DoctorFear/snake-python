@@ -4,11 +4,12 @@ from setting import TILE_SIZE
 from support import import_image
 
 class Snake(pygame.sprite.Sprite):
-    def __init__(self, pos, groups, game_width, game_height, mode):
+    def __init__(self, pos, groups, game_width, game_height, mode, game_manager):
         super().__init__(groups)
         self.mode = mode
         self.game_width = game_width
         self.game_height = game_height
+        self.game_manager = game_manager
 
         # --- Load ảnh đầu (4 frame) ---
         self.head_images = [
@@ -35,7 +36,7 @@ class Snake(pygame.sprite.Sprite):
         self.body_image = pygame.transform.scale(self.body_images[0], (TILE_SIZE, TILE_SIZE))
 
         self.move_sound = pygame.mixer.Sound("data/sounds/tap.wav")
-        self.move_sound.set_volume(0.3)
+        self.move_sound.set_volume(self.game_manager.sfx_volume / 100)
 
         # --- Load ảnh góc ---
         self.corner_images = {}
