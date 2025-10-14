@@ -29,7 +29,7 @@ class Game:
 
             self.valid_positions = self.get_valid_positions()
             self.walls = []
-            self.is_game_over = False
+            
             background_file = 'forest3' if mode == 'easy' else 'forest4'
             self.background = import_image('graphics', 'backgrounds', background_file, alpha=False)
             self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
@@ -42,6 +42,11 @@ class Game:
             self.is_paused = False
             self.menu_options = ["resume", "leave"]
             self.selected_index = 0  # Mặc định chọn resume
+
+            # === Game Over Menu ===
+            self.is_game_over = False
+            self.over_menu_options = ["restart", "leave"]
+            self.over_selected_index = 0 # Mặc định chọn restart
 
 
     def setup(self):
@@ -84,8 +89,28 @@ class Game:
 
     def handle_input(self, event):
         self.click_sound = pygame.mixer.Sound("data/sounds/tap.wav")
+
+        # === ƯU TIÊN KIỂM TRA GAME OVER MENU TRƯỚC ===
+        if self.is_game_over:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    self.over_selected_index = (self.over_selected_index - 1) % len(self.over_menu_options)
+                    self.click_sound.play()
+                elif event.key == pygame.K_DOWN:
+                    self.over_selected_index = (self.over_selected_index + 1) % len(self.over_menu_options)
+                    self.click_sound.play()
+                elif event.key in [pygame.K_RETURN, pygame.K_SPACE]:
+                    selected = self.over_menu_options[self.over_selected_index]
+                    if selected == "restart":
+                        self.reset()
+                        self.game_manager.apply_volume()
+                    elif selected == "leave":
+                        pygame.mixer.music.stop()
+                        return "menu"
+            return  # ⛔ Dừng luôn, không xử lý phần khác
+
+        # === PAUSE MENU ===
         if event.type == pygame.KEYDOWN:
-            # ESC để bật/tắt pause
             if event.key == pygame.K_ESCAPE and not self.is_game_over:
                 self.is_paused = not self.is_paused
                 if self.is_paused:
@@ -94,7 +119,6 @@ class Game:
                     pygame.mixer.music.unpause()
                 return
 
-            # === Nếu đang pause thì điều khiển menu ===
             if self.is_paused:
                 if event.key == pygame.K_UP:
                     self.selected_index = (self.selected_index - 1) % len(self.menu_options)
@@ -112,15 +136,12 @@ class Game:
                         return "menu"
                 return
 
-            # === Game over: nhấn space để reset ===
-            if self.is_game_over and event.key == pygame.K_SPACE:
-                self.reset()
-                self.game_manager.apply_volume()
-            elif not self.is_paused:
-                self.snake.input(event)
+            # === Điều khiển rắn bình thường ===
+            self.snake.input(event)
 
         elif event.type == pygame.KEYUP and not self.is_paused:
             self.snake.input(event)
+
 
     def check_collisions(self):
         snake_head_pos = self.snake.body[0]
@@ -214,11 +235,8 @@ class Game:
             self.draw_pause_menu(surface)
 
         if self.is_game_over:
-            font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 50)
-            text_surface = render_text_with_shadow(
-                'Game Over! Press Space', font, WHITE, BLACK, shadow_offset=(3, 3)
-            )
-            surface.blit(text_surface, text_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
+            self.draw_game_over_menu(surface)
+
 
     # Hàm vẽ menu pause
     def draw_pause_menu(self, surface):
@@ -256,6 +274,41 @@ class Game:
                 arrow_x = WIDTH // 2 - 150
 
                 pygame.draw.polygon(surface, (255, 255, 255), [
+                    (arrow_x, arrow_y),
+                    (arrow_x - size, arrow_y - size * 0.7),
+                    (arrow_x - size, arrow_y + size * 0.7)
+                ])
+
+    def draw_game_over_menu(self, surface):
+        overlay = pygame.Surface((WIDTH, HEIGHT))
+        overlay.set_alpha(180)
+        overlay.fill((0, 0, 0))
+        surface.blit(overlay, (0, 0))
+
+        try:
+            title_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 60)
+            btn_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 40)
+        except Exception:
+            title_font = pygame.font.SysFont("Arial", 60)
+            btn_font = pygame.font.SysFont("Arial", 40)
+
+        # Tiêu đề
+        title = title_font.render("GAME OVER", True, (255, 60, 60))
+        surface.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 120)))
+
+        # Vẽ nút menu
+        for i, name in enumerate(self.over_menu_options):
+            color = WHITE if i == self.over_selected_index else (150, 150, 150)
+            text = btn_font.render(name.capitalize(), True, color)
+            text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + i * 80))
+            surface.blit(text, text_rect)
+
+            # Mũi tên trắng bên trái
+            if i == self.over_selected_index:
+                size = 25
+                arrow_y = text_rect.centery + 6
+                arrow_x = WIDTH // 2 - 150
+                pygame.draw.polygon(surface, WHITE, [
                     (arrow_x, arrow_y),
                     (arrow_x - size, arrow_y - size * 0.7),
                     (arrow_x - size, arrow_y + size * 0.7)
