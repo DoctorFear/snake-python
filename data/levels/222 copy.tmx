@@ -2,36 +2,6 @@
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="15" tilewidth="50" tileheight="50" infinite="0" nextlayerid="4" nextobjectid="7">
  <tileset firstgid="1" name="items" tilewidth="88" tileheight="78" tilecount="19" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
-  <tile id="10">
-   <image source="../../graphics/objects/items/1.png" width="50" height="50"/>
-  </tile>
-  <tile id="11">
-   <image source="../../graphics/objects/items/2.png" width="51" height="51"/>
-  </tile>
-  <tile id="12">
-   <image source="../../graphics/objects/items/3.png" width="50" height="50"/>
-  </tile>
-  <tile id="13">
-   <image source="../../graphics/objects/items/4.png" width="50" height="50"/>
-  </tile>
-  <tile id="14">
-   <image source="../../graphics/objects/items/5.png" width="50" height="50"/>
-  </tile>
-  <tile id="15">
-   <image source="../../graphics/objects/items/6.png" width="50" height="50"/>
-  </tile>
-  <tile id="16">
-   <image source="../../graphics/objects/items/7.png" width="50" height="50"/>
-  </tile>
-  <tile id="17">
-   <image source="../../graphics/objects/items/8.png" width="50" height="50"/>
-  </tile>
-  <tile id="18">
-   <image source="../../graphics/objects/items/apple_golden.png" width="88" height="78"/>
-  </tile>
-  <tile id="19">
-   <image source="../../graphics/objects/items/diamond.png" width="64" height="64"/>
-  </tile>
   <tile id="20">
    <image source="../../graphics/objects/items/1a.png" width="50" height="50"/>
   </tile>
