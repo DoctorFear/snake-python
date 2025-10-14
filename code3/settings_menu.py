@@ -6,14 +6,12 @@ from setting import WIDTH, HEIGHT, WHITE, BLACK
 import os
 
 class SettingsMenu:
-    """Menu cài đặt"""
     def __init__(self, game_manager):
         self.game_manager = game_manager
         font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 25)
         self.click_sound = pygame.mixer.Sound("data/sounds/tap.wav")
         self.click_sound.set_volume(0.3)
 
-        # Selected skin (Green hoặc Red)
         self.selected_skin = "green"
 
         # --- Skin boxes ---
@@ -23,12 +21,31 @@ class SettingsMenu:
         self.skin1_rect = pygame.Rect(left_center - box_size - spacing//2, HEIGHT//2 - 20, box_size, box_size)
         self.skin2_rect = pygame.Rect(left_center + spacing//2, HEIGHT//2 - 20, box_size, box_size)
 
+        # --- Load ảnh skin (giữ trong suốt) ---
+        self.green_skin = pygame.image.load("data/images/green_dragon.png").convert_alpha()
+        self.red_skin = pygame.image.load("data/images/red_dragon.png").convert_alpha()
+        self.green_skin = pygame.transform.scale(self.green_skin, (box_size, box_size))
+        self.red_skin = pygame.transform.scale(self.red_skin, (box_size, box_size))
+
+        # 💡 Bo góc ảnh trực tiếp
+        for_skin = [self.green_skin, self.red_skin]
+        for i in range(len(for_skin)):
+            size = for_skin[i].get_size()
+            mask = pygame.Surface(size, pygame.SRCALPHA)
+            pygame.draw.rect(mask, (255, 255, 255, 255), (0, 0, *size), border_radius=16)
+            rounded = for_skin[i].copy()
+            rounded.blit(mask, (0, 0), None, pygame.BLEND_RGBA_MIN)
+            for_skin[i] = rounded
+
+        self.green_skin, self.red_skin = for_skin
+
         # --- Volume slider ---
         slider_width = 350
         self.music_slider = Slider(3*WIDTH//4 - slider_width//2, HEIGHT//2 - 20, slider_width, initial_value=self.game_manager.music_volume)
         self.sfx_slider = Slider(3*WIDTH//4 - slider_width//2, HEIGHT//2 + 100, slider_width, initial_value=self.game_manager.sfx_volume)
         # --- Back button ---
         self.back_btn = Button(WIDTH//2 - 100, HEIGHT - 120, 200, 60, "Back", "#4d4d4d", "#3a3a3a", font)
+
 
     def draw(self, screen):
         top_color = (0, 174, 239)
@@ -59,6 +76,7 @@ class SettingsMenu:
         pygame.draw.rect(screen, WHITE, self.skin1_rect, border_radius=8)
         pygame.draw.rect(screen, WHITE, self.skin2_rect, border_radius=8)
 
+        # --- Label ---
         green_label = render_text_with_shadow("GREEN", label_font, WHITE, BLACK, shadow_offset=(0, 3))
         red_label = render_text_with_shadow("RED", label_font, WHITE, BLACK, shadow_offset=(0, 3))
         screen.blit(green_label, (self.skin1_rect.centerx - green_label.get_width()//2, self.skin1_rect.bottom + 15))
@@ -86,6 +104,8 @@ class SettingsMenu:
 
         # === Back button ===
         self.back_btn.draw(screen)
+
+        
 
     def handle_event(self, event):
         # Chọn skin

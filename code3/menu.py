@@ -22,17 +22,7 @@ class Menu:
             #Button(1300, 630, 150, 70, "Quit", "#5e503f", "#3d2f23", font)
         ]
 
-        # --- Load texture viền ---
-        border_path = os.path.join("graphics", "objects", "items", "sandstone_carved.png")
-        try:
-            self.border_img = pygame.image.load(border_path).convert_alpha()
-            self.tile_size = self.border_img.get_width()
-            self.has_border = True
-        except Exception as e:
-            print(f"Không thể load texture viền: {e}")
-            # Nếu không tìm thấy texture, vẽ viền đơn giản
-            self.has_border = False
-            self.tile_size = 50
+
 
     
     def draw(self, screen):
