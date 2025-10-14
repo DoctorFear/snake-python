@@ -3,8 +3,6 @@ from pygame.math import Vector2
 from setting import TILE_SIZE
 
 class Laser(pygame.sprite.Sprite):
-    """Class quản lý tia laser bắn từ enemy"""
-    
     def __init__(self, start_pos, direction, game_width, game_height, speed=10):
         self.start_pos = start_pos.copy()
         self.direction = direction.copy()

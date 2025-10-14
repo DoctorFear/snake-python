@@ -182,6 +182,11 @@ class Game:
     def draw(self, surface):
         surface.blit(self.background, (0, 0))
 
+        # Vẽ walls (vật cản)
+        for sprite in self.groups:
+            if hasattr(sprite, 'image') and sprite not in [self.snake, self.food, self.enemy]:
+                surface.blit(sprite.image, sprite.rect)
+                
         self.snake.draw(surface)
         surface.blit(self.food.image, self.food.rect)
 
@@ -214,7 +219,6 @@ class Game:
                 'Game Over! Press Space', font, WHITE, BLACK, shadow_offset=(3, 3)
             )
             surface.blit(text_surface, text_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
-
 
     # Hàm vẽ menu pause
     def draw_pause_menu(self, surface):

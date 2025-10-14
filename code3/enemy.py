@@ -60,26 +60,56 @@ class Enemy(pygame.sprite.Sprite):
         else:
             direction = Vector2(0, 1)
 
+        # Kiểm tra xem đuôi rồng có ở rìa map không
+        tail_at_left = tail_pos.x <= 1
+        tail_at_right = tail_pos.x >= map_w - 2
+        tail_at_top = tail_pos.y <= 1
+        tail_at_bottom = tail_pos.y >= map_h - 2
+
         # Chọn rìa tương ứng và xác định hướng laser
         laser_direction = Vector2(0, 0)
         if abs(direction.x) > abs(direction.y):
             if direction.x > 0:
-                spawn_pos = Vector2(map_w - 1, tail_pos.y)
-                offset = Vector2(-1, 0)
-                laser_direction = Vector2(-1, 0)  # Bắn sang trái
+                # Đuôi đang ở rìa phải -> spawn bên trái
+                if tail_at_right:
+                    spawn_pos = Vector2(0, tail_pos.y)
+                    offset = Vector2(1, 0)
+                    laser_direction = Vector2(1, 0)  # Bắn sang phải
+                else:
+                    spawn_pos = Vector2(map_w - 1, tail_pos.y)
+                    offset = Vector2(-1, 0)
+                    laser_direction = Vector2(-1, 0)  # Bắn sang trái
             else:
-                spawn_pos = Vector2(0, tail_pos.y)
-                offset = Vector2(1, 0)
-                laser_direction = Vector2(1, 0)  # Bắn sang phải
+                # Đuôi đang ở rìa trái -> spawn bên phải
+                if tail_at_left:
+                    spawn_pos = Vector2(map_w - 1, tail_pos.y)
+                    offset = Vector2(-1, 0)
+                    laser_direction = Vector2(-1, 0)  # Bắn sang trái
+                else:
+                    spawn_pos = Vector2(0, tail_pos.y)
+                    offset = Vector2(1, 0)
+                    laser_direction = Vector2(1, 0)  # Bắn sang phải
         else:
             if direction.y > 0:
-                spawn_pos = Vector2(tail_pos.x, map_h - 1)
-                offset = Vector2(0, -1)
-                laser_direction = Vector2(0, -1)  # Bắn lên trên
+                # Đuôi đang ở rìa dưới -> spawn bên trên
+                if tail_at_bottom:
+                    spawn_pos = Vector2(tail_pos.x, 0)
+                    offset = Vector2(0, 1)
+                    laser_direction = Vector2(0, 1)  # Bắn xuống dưới
+                else:
+                    spawn_pos = Vector2(tail_pos.x, map_h - 1)
+                    offset = Vector2(0, -1)
+                    laser_direction = Vector2(0, -1)  # Bắn lên trên
             else:
-                spawn_pos = Vector2(tail_pos.x, 0)
-                offset = Vector2(0, 1)
-                laser_direction = Vector2(0, 1)  # Bắn xuống dưới
+                # Đuôi đang ở rìa trên -> spawn bên dưới
+                if tail_at_top:
+                    spawn_pos = Vector2(tail_pos.x, map_h - 1)
+                    offset = Vector2(0, -1)
+                    laser_direction = Vector2(0, -1)  # Bắn lên trên
+                else:
+                    spawn_pos = Vector2(tail_pos.x, 0)
+                    offset = Vector2(0, 1)
+                    laser_direction = Vector2(0, 1)  # Bắn xuống dưới
 
         # Nếu vị trí không hợp lệ
         if spawn_pos not in self.valid_positions or spawn_pos in self.snake.body:
