@@ -5,9 +5,12 @@ from pygame.math import Vector2
 from setting import TILE_SIZE
 
 class Food(pygame.sprite.Sprite):
-    def __init__(self, groups, snake, valid_positions):
+    def __init__(self, groups, snake, valid_positions, mode):
         super().__init__(groups)
-        spritesheet = pygame.image.load("data/images/food.png").convert_alpha()
+
+        self.mode = mode
+        image_file = 'data/images/foods/food1.png' if mode == 'easy' else 'data/images/foods/food2.png'
+        spritesheet = pygame.image.load(image_file).convert_alpha()
         
         # 4 frames xếp theo lưới 2 cột x 2 hàng
         self.frames = []
@@ -49,6 +52,7 @@ class Food(pygame.sprite.Sprite):
     #Glow effect cho food
     def update(self, dt):
         """Cập nhật animation"""
+        # Animation từ spritesheet
         self.animation_timer += dt
         if self.animation_timer >= self.animation_speed:
             self.animation_timer = 0
