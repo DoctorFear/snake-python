@@ -4,7 +4,7 @@ from setting import TILE_SIZE
 
 class Laser(pygame.sprite.Sprite):
     def __init__(self, start_pos, direction, game_width, game_height, speed=10):
-        self.start_pos = start_pos.copy()
+        self.start_pos = start_pos.copy() + direction * 0.5
         self.direction = direction.copy()
         self.game_width = game_width
         self.game_height = game_height
@@ -77,13 +77,34 @@ class Laser(pygame.sprite.Sprite):
                 break
         return positions
     
+    def get_laser_positions_preview(self):
+        """Lấy toàn bộ vị trí laser sẽ bắn (dùng cho warning)"""
+        positions = []
+        pos = self.start_pos.copy()
+        map_w = int(self.game_width / TILE_SIZE)
+        map_h = int(self.game_height / TILE_SIZE)
+        
+        for _ in range(int(self.max_length)):
+            if 0 <= pos.x < map_w and 0 <= pos.y < map_h:
+                positions.append(pos.copy())
+                pos += self.direction
+            else:
+                break
+        return positions
+    
     def check_collision_with_body(self, body_list):
         if not self.active:
             return False
         
         laser_positions = self.get_laser_positions()
-        for body_part in body_list:
-            if body_part in laser_positions:
+        for laser_pos in laser_positions:
+            # Làm tròn vị trí laser về grid
+            grid_x = int(laser_pos.x + 0.5)  # Làm tròn chuẩn
+            grid_y = int(laser_pos.y + 0.5)
+            grid_pos = Vector2(grid_x, grid_y)
+            
+            # Kiểm tra va chạm với từng phần thân rắn
+            if grid_pos in body_list:
                 return True
         return False
     
@@ -97,7 +118,7 @@ class Laser(pygame.sprite.Sprite):
             x = pos.x * TILE_SIZE - camera_offset[0]
             y = pos.y * TILE_SIZE - camera_offset[1]
             
-            # ✅ Phần tròn luôn ở cuối (đầu laser đang chạy)
+            # Phần tròn luôn ở cuối (đầu laser đang chạy)
             if i == len(laser_positions) - 1:
                 surface.blit(self.laser_head, (x, y))
             else:

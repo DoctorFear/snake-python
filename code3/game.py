@@ -221,9 +221,9 @@ class Game:
         surface.blit(self.food.image, self.food.rect)
 
         if self.enemy:
+            self.enemy.draw_warning(surface)
             self.enemy.draw_laser(surface)
             surface.blit(self.enemy.image, self.enemy.rect)
-            self.enemy.draw_warning(surface)
 
         font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 20)
         score_text = render_text_with_shadow(
