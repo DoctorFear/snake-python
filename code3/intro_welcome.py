@@ -30,12 +30,15 @@ class IntroWelcome:
     def draw(self, screen):
         self.draw_gradient(screen)
 
-        title = self.font_title.render("Chào mừng Chiến binh Rồng!", True, WHITE)
+        title = self.font_title.render("Welcome Dragon Warrior!", True, WHITE)
         text_lines = [
-            "Sau những giờ học tập và làm việc căng thẳng,",
-            "hãy để Dragon Hunter dẫn bạn vào một cuộc phiêu lưu săn bắt đầy màu sắc.",
-            "Chỉ vài phút thư giãn, bạn sẽ tái tạo lại năng lượng mạnh mẽ",
-            "cho những hoạt động sắp tới."
+            "After stressful hours of studying and working,",
+            "let Dragon Hunter lead you on a colorful hunting adventure.",
+            "Just a few minutes of relaxation will recharge ",
+            "your batteries for the activities ahead.",
+            "",
+            "",
+            "Get ready to embark on an exciting journey with Rosamo!",
         ]
 
         screen.blit(title, (WIDTH//2 - title.get_width()//2, 120))

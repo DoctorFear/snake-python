@@ -7,7 +7,7 @@ class IntroDescription:
         self.game_manager = game_manager
         # Font
         self.font_title = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 34)
-        self.font_text = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 22)
+        self.font_text = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 21)
 
         # Nút bắt đầu
         self.button_next = Button(
@@ -26,45 +26,50 @@ class IntroDescription:
 
         # --- Nội dung CHẾ ĐỘ 1 ---
         lines1 = [
-            "CHẾ ĐỘ 1: TÁI KHỞI ĐỘNG (DỄ)",
+            "MODE 1: REBOOT",
             "",
-            "Bạn sẽ nhập vai Rosamo - Chú Rồng Trẻ đang ",
-            "trên hành trình trưởng thành.", 
+            "You will play as Rosamo - the Young Dragon ", "on his journey to adulthood.", 
             "",
-            "• Nhiệm vụ: Săn những Chú Cá Lấp Lánh để tích",
-            "lũy kinh nghiệm.",
-            "• Thử thách: Cứ mỗi khi Rosamo săn được 5 chú",
-            "Cá Lấp Lánh, một Cổ Máy Bí Ẩn sẽ kích hoạt,",
-            "phóng ra Chùm Sáng Aza nguy hiểm.",
-            "• Khi săn đủ 10 chú Cá Lấp Lánh, Rosamo sẽ",
-            "Trưởng Thành Toàn Diện, đạt được Tốc Độ ",
-            "Bứt Phá để né tránh hoàn hảo.",
-            "• Lưu ý: Sự cẩn trọng là chìa khóa để vượt ",
-            "qua giai đoạn khởi động này."
+            "• Mission: Hunt for Sparkling Fish to gain ",
+            "experience",
+            "",
+            "• Challenge: Every time Rosamo hunts 5",
+            "Sparkling Fish, a Mysterious Machine will ",
+            "activate, releasing a dangerous Aza Beam.",
+            "",
+            "• Once Rosamo has hunted 10 Sparkling Fish, ",
+            "it will reach full maturity, gaining speed ",
+            "boots for perfect dodging.",
+            "",
+            "• Suggest: Caution is key to getting through ",
+            "this startup phase."
         ]
 
         # --- Nội dung CHẾ ĐỘ 2 ---
         lines2 = [
-            "CHẾ ĐỘ 2: TRUY TÌM THỬ THÁCH (KHÓ)",
+            "MODE 2: FINDING CHALLENGES",
             "",
-            "Bạn sẽ nhập vai Rosamo - Thợ Săn Huyền Thoại",
-            "đã sẵn sàng đối mặt với rủi ro cao nhất.",
+            "You will play as Rosamo - Legendary Hunter",
+            "willing to face the highest risks.",
             "",
-            "• Nhiệm vụ: Vẫn là săn Chú Cá Lấp Lánh - nguồn ", 
-            "năng lượng của Rosamo.",
-            "• Thử thách: Mức độ nguy hiểm tăng gấp đôi!",
-            "Cứ mỗi 8 chú Cá Lấp Lánh được săn, hai Cổ Máy", 
-            "Bí Ẩn sẽ cùng khai hỏa Chùm Sáng Aza cực mạnh.",
-            "• Khi săn đủ 8 chú Cá Lấp Lánh, Rosamo sẽ", 
-            "Trưởng Thành Tức Thì, đạt được Tốc Độ Thần", 
-            "Tốc để né tránh tối đa.",
-            "• Cảnh báo: Hãy cực kỳ cảnh giác! Vật cản bất",
-            "ngờ sẽ xuất hiện liên tục!"
+            "• Mission: Hunting Sparkling Fish - Rosamo's ", 
+            "source of energy.",
+            "",
+            "• Challenge: The danger level is doubled!",
+            "For every 5 Sparkling Fish hunted, the Mysterious ", 
+            "Machine will fire a powerful Aza Beam.",
+            "",
+            "• Once Rosamo has hunted 10 Sparkling Fish, ",
+            "it will reach full maturity, gaining speed ",
+            "boots for perfect dodging.",
+            "",
+            "• Suggest: Be extremely alert! Obstacles have ",
+            "been appearing all the time!"
         ]
 
         # --- Giãn dòng đều ---
-        top_margin = 70
-        line_gap_title = 40
+        top_margin = 40
+        line_gap_title = 30
         line_gap_text = 36
 
         # --- Cột trái ---
