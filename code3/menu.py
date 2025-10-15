@@ -16,7 +16,8 @@ class Menu:
         self.buttons = [
             Button(WIDTH//2 - 200, HEIGHT//2 - 5, 400, 70, "Play", "#4d4d4d", "#3a3a3a", font),
             Button(WIDTH//2 - 200, HEIGHT//2 + 100, 400, 70, "Settings", "#4d4d4d", "#3a3a3a", font),
-            Button(1300, 630, 150, 70, "Quit", "#4d4d4d", "#3a3a3a", font)
+            Button(1300, 660, 150, 70, "Quit", "#4d4d4d", "#3a3a3a", font),
+            Button(40, 660, 150, 70, "Help", "#4d4d4d", "#3a3a3a", font)
             #Button(WIDTH//2 - 200, HEIGHT//2 - 5, 400, 70, "Play", "#5e503f","#3d2f23", font),    
             #Button(WIDTH//2 - 200, HEIGHT//2 + 100, 400, 70, "Settings", "#5e503f","#3d2f23", font), 
             #Button(1300, 630, 150, 70, "Quit", "#5e503f", "#3d2f23", font)
@@ -55,6 +56,9 @@ class Menu:
                 elif b.text == "Settings":
                     self.game_manager.change_state("settings")
                     self.click_sound.play()
+                elif b.text == "Help":
+                    self.game_manager.change_state("intro_welcome")
+                    self.click_sound.play()  
                 elif b.text == "Quit":
                     pygame.quit()
                     exit()

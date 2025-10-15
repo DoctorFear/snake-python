@@ -8,7 +8,7 @@ import os
 class SettingsMenu:
     def __init__(self, game_manager):
         self.game_manager = game_manager
-        font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 25)
+        font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 30)
         self.click_sound = pygame.mixer.Sound("data/sounds/tap.wav")
         self.click_sound.set_volume(0.3)
 
@@ -18,7 +18,7 @@ class SettingsMenu:
         box_size = 150
         spacing = 40
         left_center = WIDTH // 4
-        skin_y = HEIGHT // 2 - box_size // 2 - 50  # Điều chỉnh để căn giữa tốt hơn sau khi thêm ảnh
+        skin_y = HEIGHT // 2 - box_size // 2 + 10  # Điều chỉnh để căn giữa tốt hơn sau khi thêm ảnh
         self.skin1_rect = pygame.Rect(left_center - box_size - spacing//2, skin_y, box_size, box_size)
         self.skin2_rect = pygame.Rect(left_center + spacing//2, skin_y, box_size, box_size)
 
@@ -46,13 +46,16 @@ class SettingsMenu:
         self.music_slider = Slider(3*WIDTH//4 - slider_width//2, slider_y_start, slider_width, initial_value=self.game_manager.music_volume)
         self.sfx_slider = Slider(3*WIDTH//4 - slider_width//2, slider_y_start + 120, slider_width, initial_value=self.game_manager.sfx_volume)
         # --- Back button ---
-        self.back_btn = Button(WIDTH//2 - 100, HEIGHT - 120, 200, 60, "Back", "#4d4d4d", "#3a3a3a", font)
+        self.back_btn = Button(WIDTH//2 - 75, HEIGHT - 120, 150, 70, "Back", "#4d4d4d", "#3a3a3a", font)
 
 
     def draw(self, screen):
         top_color = (0, 174, 239)
         bottom_color = (0, 114, 188)
         draw_gradient_background(screen, top_color, bottom_color)
+        #top_color = (255, 196, 140)   
+        #bottom_color = (179, 89, 0)   
+        #draw_gradient_background(screen, top_color, bottom_color)
 
         title_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 50)
         title1_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 35)

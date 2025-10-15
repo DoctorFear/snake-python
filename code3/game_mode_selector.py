@@ -14,7 +14,7 @@ class GameModeSelector:
         self.buttons = [
             Button(WIDTH//2 - 100, HEIGHT//2 - 40, 220, 60, "Easy", "#4d4d4d", "#3a3a3a", font),
             Button(WIDTH//2 - 100, HEIGHT//2 + 40, 220, 60, "Hard", "#4d4d4d", "#3a3a3a", font),
-            Button(40, 655, 140, 60, "Back", "#4d4d4d", "#3a3a3a", font)
+            Button(40, 660, 150, 70, "Back", "#4d4d4d", "#3a3a3a", font)
         ]
 
     def draw(self, screen):

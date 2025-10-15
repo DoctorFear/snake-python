@@ -10,7 +10,7 @@ from intro_description import IntroDescription
 class GameManager:
     def __init__(self, screen):
         self.screen = screen
-        self.state = "intro_welcome"  # intro_welcome, intro_description, menu, mode_select, game, settings
+        self.state = "menu"  # intro_welcome, intro_description, menu, mode_select, game, settings
         self.selected_mode = "easy"  # easy hoặc hard
         
         # --- Cài đặt game ---
