@@ -264,13 +264,13 @@ class Game:
             btn_font = pygame.font.SysFont("Arial", 40)
 
         # Title
-        title = title_font.render('GAME PAUSED', True, (255, 255, 255))
+        title = render_text_with_shadow('GAME PAUSED',title_font, WHITE, BLACK, shadow_offset=(0, 5))
         surface.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 120)))
 
         # Vẽ từng lựa chọn trong menu
         for i, name in enumerate(self.menu_options):
             color = (255, 255, 255) if i == self.selected_index else (180, 180, 180)
-            text = btn_font.render(name.capitalize(), True, color)
+            text = render_text_with_shadow(name.capitalize(),btn_font, color, BLACK, shadow_offset=(0, 5))
             text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + i * 80))
             surface.blit(text, text_rect)
 
@@ -300,13 +300,13 @@ class Game:
             btn_font = pygame.font.SysFont("Arial", 40)
 
         # Tiêu đề
-        title = title_font.render("GAME OVER", True, (255, 60, 60))
+        title = render_text_with_shadow('GAME OVER',title_font, (255, 60, 60), BLACK, shadow_offset=(0, 5))
         surface.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 120)))
 
         # Vẽ nút menu
         for i, name in enumerate(self.over_menu_options):
             color = WHITE if i == self.over_selected_index else (150, 150, 150)
-            text = btn_font.render(name.capitalize(), True, color)
+            text = render_text_with_shadow(name.capitalize(),btn_font, color, BLACK, shadow_offset=(0, 5))
             text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + i * 80))
             surface.blit(text, text_rect)
 
