@@ -90,4 +90,7 @@ class IntroDescription:
 
     def handle_event(self, event):
         if self.button_next.is_clicked(event):
+            self.click_sound = pygame.mixer.Sound("data/sounds/tap.wav")
+            self.click_sound.set_volume(self.game_manager.sfx_volume / 100)
+            self.click_sound.play()
             self.game_manager.change_state("menu")

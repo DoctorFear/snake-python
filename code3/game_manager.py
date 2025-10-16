@@ -36,6 +36,9 @@ class GameManager:
         if self.game:
             self.game.collect_sound.set_volume(self.sfx_volume / 100.0)
             self.game.dead_sound.set_volume(self.sfx_volume / 100.0)
+            # Điều chỉnh âm thanh tiếng click 
+            if hasattr(self.game, "click_sound"):
+                self.game.click_sound.set_volume(self.sfx_volume / 100.0)
 
     def change_state(self, new_state):
         """Chuyển trạng thái game mà không reset nhạc menu mỗi lần"""

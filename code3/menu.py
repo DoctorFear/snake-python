@@ -2,7 +2,7 @@ import pygame
 from button import Button
 from gui import *
 from setting import WIDTH, HEIGHT, WHITE, RED, BLUE, YELLOW, BLACK
-import os
+import cv2
 
 class Menu:
     """Menu chính"""
@@ -18,23 +18,36 @@ class Menu:
             Button(WIDTH//2 - 200, HEIGHT//2 + 100, 400, 70, "Settings", "#4d4d4d", "#3a3a3a", font),
             Button(1300, 660, 150, 70, "Quit", "#4d4d4d", "#3a3a3a", font),
             Button(40, 660, 150, 70, "Help", "#4d4d4d", "#3a3a3a", font)
-            #Button(WIDTH//2 - 200, HEIGHT//2 - 5, 400, 70, "Play", "#5e503f","#3d2f23", font),    
-            #Button(WIDTH//2 - 200, HEIGHT//2 + 100, 400, 70, "Settings", "#5e503f","#3d2f23", font), 
-            #Button(1300, 630, 150, 70, "Quit", "#5e503f", "#3d2f23", font)
         ]
 
+        # Mở video bằng OpenCV
+        self.cap = cv2.VideoCapture("graphics/backgrounds/background.mp4")
 
-
-    
     def draw(self, screen):
-        # --- Nền gradient ---
-        top_color = (0, 174, 239)
-        bottom_color = (0, 114, 188)
-        draw_gradient_background(screen, top_color, bottom_color)
-        #top_color = (255, 196, 140)   
-        #bottom_color = (179, 89, 0)   
-        #draw_gradient_background(screen, top_color, bottom_color)
-        
+        if self.cap.isOpened():
+            ret, frame = self.cap.read()
+            if not ret:
+                self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                ret, frame = self.cap.read()
+
+            if ret:
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+                # === Giữ tỉ lệ và crop cho vừa màn hình ===
+                vid_h, vid_w, _ = frame.shape
+                scale = max(WIDTH / vid_w, HEIGHT / vid_h)  # phóng to vừa khít màn hình
+
+                new_w, new_h = int(vid_w * scale), int(vid_h * scale)
+                frame = cv2.resize(frame, (new_w, new_h))
+
+                # Cắt giữa nếu kích thước vượt khung
+                x_start = (new_w - WIDTH) // 2
+                y_start = (new_h - HEIGHT) // 2
+                frame = frame[y_start:y_start + HEIGHT, x_start:x_start + WIDTH]
+
+                # Chuyển thành surface để vẽ
+                frame_surface = pygame.surfarray.make_surface(frame.swapaxes(0, 1))
+                screen.blit(frame_surface, (0, 0))
         
         # --- Tiêu đề ---
         title_font = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 80)
@@ -47,7 +60,7 @@ class Menu:
 
     def handle_event(self, event):
         self.click_sound = pygame.mixer.Sound("data/sounds/tap.wav")
-        self.click_sound.set_volume(0.3)
+        self.click_sound.set_volume(self.game_manager.sfx_volume / 100)
         for b in self.buttons:
             if b.is_clicked(event):
                 if b.text == "Play":
@@ -62,3 +75,7 @@ class Menu:
                 elif b.text == "Quit":
                     pygame.quit()
                     exit()
+    
+    def __del__(self):
+        if hasattr(self, "cap") and self.cap.isOpened():
+            self.cap.release()
