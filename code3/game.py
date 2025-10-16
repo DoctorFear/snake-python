@@ -166,7 +166,7 @@ class Game:
                 self.enemy = Enemy(self.groups, self.snake, self.valid_positions,
                                    self.tmx_map.width * TILE_SIZE,
                                    self.tmx_map.height * TILE_SIZE,
-                                   self.mode)
+                                   self.mode, self.game_manager)
                 self.enemy_spawn_time = pygame.time.get_ticks()
                 self.enemy_active = True
 
@@ -180,7 +180,9 @@ class Game:
         self.enemy_spawn_time = None
         pygame.mixer.music.load(self.music_file)
         pygame.mixer.music.play(-1)
-        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.set_volume(self.game_manager.music_volume / 100)
+        if self.enemy:
+            self.enemy.spawn_sound.set_volume(self.game_manager.sfx_volume / 100)
 
     def update(self, dt):
         if self.is_paused or self.is_game_over:
@@ -192,6 +194,9 @@ class Game:
         if self.is_game_over:
             self.dead_sound.play()
             pygame.mixer.music.stop()
+            if self.enemy:
+                self.enemy.spawn_sound.set_volume(0)
+        
 
         self.check_collisions()
 
@@ -201,6 +206,8 @@ class Game:
                 self.is_game_over = True
                 self.dead_sound.play()
                 pygame.mixer.music.stop()
+                if self.enemy:
+                    self.enemy.spawn_sound.set_volume(0)
             
             elapsed = (pygame.time.get_ticks() - self.enemy_spawn_time) / 1000
             if elapsed >= 6:

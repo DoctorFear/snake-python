@@ -5,11 +5,14 @@ from pygame.math import Vector2
 from laser import Laser
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, groups, snake, valid_positions, game_width, game_height, mode):
+    def __init__(self, groups, snake, valid_positions, game_width, game_height, mode, game_manager):
         super().__init__(groups)
         
         self.mode = mode
+        self.game_manager = game_manager
         image_file = 'data/images/enemies/enemy1.png' if mode == 'easy' else 'data/images/enemies/enemy2.png'
+        self.spawn_sound = pygame.mixer.Sound("data/sounds/enemy.wav")
+        self.spawn_sound.set_volume(self.game_manager.sfx_volume / 100)
         spritesheet = pygame.image.load(image_file).convert_alpha()
         
         # 4 frames xếp theo lưới 2 cột x 2 hàng
@@ -137,6 +140,9 @@ class Enemy(pygame.sprite.Sprite):
         
         # Khởi tạo object Laser
         self.laser = Laser(self.grid_pos, laser_direction, self.game_width, self.game_height, speed=30)
+
+        if not self.spawn_failed:
+            self.spawn_sound.play()
     
     def rotate_submarine(self, spawn_pos, laser_direction):
         """Xoay tàu ngầm theo laser_direction sao cho khớp yêu cầu của bạn:
