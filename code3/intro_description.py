@@ -17,13 +17,10 @@ class IntroDescription:
         )
 
     def draw(self, screen):
-        # --- Nền chia đôi ---
-        #left_color = (255, 180, 90)
-        #right_color = (230, 130, 30)
-        left_color = (0, 174, 239)
-        right_color = (0, 114, 188)
-        pygame.draw.rect(screen, left_color, (0, 0, WIDTH // 2, HEIGHT))
-        pygame.draw.rect(screen, right_color, (WIDTH // 2, 0, WIDTH // 2, HEIGHT))
+        """ Chèn ảnh nền """
+        self.background_image = pygame.image.load("graphics/backgrounds/mission_bg.png").convert()
+        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
+        screen.blit(self.background_image, (0, 0))
 
         # --- Nội dung CHẾ ĐỘ 1 ---
         lines1 = [

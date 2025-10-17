@@ -17,13 +17,10 @@ class GameModeSelector:
         ]
 
     def draw(self, screen):
-        # --- Nền gradient ---
-        top_color = (0, 174, 239)
-        bottom_color = (0, 114, 188)
-        draw_gradient_background(screen, top_color, bottom_color)
-        #top_color = (255, 196, 140)   
-        #bottom_color = (179, 89, 0)   
-        #draw_gradient_background(screen, top_color, bottom_color)
+        # --- Chèn ảnh nền ---
+        self.background_image = pygame.image.load("graphics/backgrounds/help_bg.png").convert()
+        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
+        screen.blit(self.background_image, (0, 0))
         
         
         # --- Tiêu đề ---

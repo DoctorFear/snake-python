@@ -45,6 +45,9 @@ class Menu:
                 y_start = (new_h - HEIGHT) // 2
                 frame = frame[y_start:y_start + HEIGHT, x_start:x_start + WIDTH]
 
+                # Làm mờ khung hình để dễ nhìn nút hơn
+                frame = cv2.GaussianBlur(frame, (21, 21), 0)
+
                 # Chuyển thành surface để vẽ
                 frame_surface = pygame.surfarray.make_surface(frame.swapaxes(0, 1))
                 screen.blit(frame_surface, (0, 0))

@@ -8,10 +8,8 @@ class IntroWelcome:
         self.game_manager = game_manager
         self.font_title = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 60)
         self.font_text = pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 30)
-        #self.bg_color_top = (255, 180, 90)
-        #self.bg_color_bottom = (230, 130, 30)
-        self.bg_color_top = (0, 174, 239)      
-        self.bg_color_bottom = (0, 114, 188) 
+        self.background_image = pygame.image.load("graphics/backgrounds/help_bg.png").convert()
+        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
 
 
         self.button_next = Button(
@@ -19,17 +17,9 @@ class IntroWelcome:
             "Next",  "#4d4d4d", "#3a3a3a", pygame.font.Font("data/fonts/FVF Fernando 08.ttf", 30)
         )
 
-    def draw_gradient(self, screen):
-        """Vẽ nền chuyển màu"""
-        for y in range(HEIGHT):
-            ratio = y / HEIGHT
-            r = int(self.bg_color_top[0] * (1 - ratio) + self.bg_color_bottom[0] * ratio)
-            g = int(self.bg_color_top[1] * (1 - ratio) + self.bg_color_bottom[1] * ratio)
-            b = int(self.bg_color_top[2] * (1 - ratio) + self.bg_color_bottom[2] * ratio)
-            pygame.draw.line(screen, (r, g, b), (0, y), (WIDTH, y))
-
     def draw(self, screen):
-        self.draw_gradient(screen)
+        """Chèn ảnh nền"""
+        screen.blit(self.background_image, (0, 0))
 
         title = render_text_with_shadow("Welcome Dragon Warrior!", self.font_title, WHITE, BLACK, shadow_offset=(0, 5))
         text_lines = [
