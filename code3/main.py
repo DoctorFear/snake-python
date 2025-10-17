@@ -8,6 +8,11 @@ def main():
     # Khởi tạo pygame 
     pygame.init()
     pygame.mixer.init()  # Tạo sound effect
+
+        # --- Thêm icon ---
+    icon = pygame.image.load("data/images/icon.png")
+    pygame.display.set_icon(icon)
+    
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Dragon Hunter")
     clock = pygame.time.Clock()
