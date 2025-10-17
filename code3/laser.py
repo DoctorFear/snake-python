@@ -3,7 +3,7 @@ from pygame.math import Vector2
 from setting import TILE_SIZE
 
 class Laser(pygame.sprite.Sprite):
-    def __init__(self, start_pos, direction, game_width, game_height, speed=10):
+    def __init__(self, start_pos, direction, game_width, game_height, mode, speed=10):
         self.start_pos = start_pos.copy() + direction * 0.5
         self.direction = direction.copy()
         self.game_width = game_width
@@ -14,14 +14,16 @@ class Laser(pygame.sprite.Sprite):
         self.max_length = self._calculate_max_length()
         
         # Load sprite laser
-        laser_img = pygame.image.load('data/images/laser.png').convert_alpha()
+        self.mode = mode
+        laser_img = 'data/images/lasers/laser1.png' if mode == 'easy' else 'data/images/lasers/laser2.png'
+        spritesheet = pygame.image.load(laser_img).convert_alpha()
         
         # Frame 1: Đầu (0, 0, 50, 50)
-        self.laser_head = laser_img.subsurface(pygame.Rect(0, 0, 50, 50))
+        self.laser_head = spritesheet.subsurface(pygame.Rect(0, 0, 50, 50))
         self.laser_head = pygame.transform.scale(self.laser_head, (TILE_SIZE, TILE_SIZE))
         
         # Frame 2: Thân (0, 50, 50, 50)
-        self.laser_body = laser_img.subsurface(pygame.Rect(0, 50, 50, 50))
+        self.laser_body = spritesheet.subsurface(pygame.Rect(0, 50, 50, 50))
         self.laser_body = pygame.transform.scale(self.laser_body, (TILE_SIZE, TILE_SIZE))
         
         # Xoay theo hướng

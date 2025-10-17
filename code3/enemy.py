@@ -113,7 +113,6 @@ class Enemy(pygame.sprite.Sprite):
                 else:
                     laser_direction = Vector2(0, -1)
 
-        # ✅ CẢ 2 ENEMY ĐỀU SPAWN VÀO TRONG MAP 1 TILE (KHÔNG ở RÌA)
         # Tính toán vị trí spawn dựa trên hướng laser
         if laser_direction.x == 1:  # Bắn sang phải → spawn ở x=1
             spawn_pos = Vector2(1, spawn_pos.y)
@@ -124,7 +123,7 @@ class Enemy(pygame.sprite.Sprite):
         elif laser_direction.y == -1:  # Bắn lên → spawn ở y=map_h-2
             spawn_pos = Vector2(spawn_pos.x, map_h - 2)
         
-        # ✅ KIỂM TRA NẾU TRÙNG VỚI ĐUÔI SNAKE THÌ BỎ QUA (NGAY TỪ ĐẦU)
+        # KIỂM TRA NẾU TRÙNG VỚI ĐUÔI SNAKE THÌ BỎ QUA
         if spawn_pos in self.snake.body:
             self.spawn_failed = True
             self.kill()  # Xóa enemy này luôn
@@ -139,7 +138,7 @@ class Enemy(pygame.sprite.Sprite):
             self.rotate_submarine(spawn_pos, laser_direction)
         
         # Khởi tạo object Laser
-        self.laser = Laser(self.grid_pos, laser_direction, self.game_width, self.game_height, speed=30)
+        self.laser = Laser(self.grid_pos, laser_direction, self.game_width, self.game_height, self.mode, speed=30)
 
         if not self.spawn_failed:
             self.spawn_sound.play()
