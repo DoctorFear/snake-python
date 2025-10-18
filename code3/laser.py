@@ -41,15 +41,19 @@ class Laser(pygame.sprite.Sprite):
         return image
         
     def _calculate_max_length(self):
-        """Tính độ dài tối đa"""
+        """Tính độ dài tối đa của laser (số ô có thể đi qua)."""
         current_pos = self.start_pos.copy()
         map_w = int(self.game_width / TILE_SIZE)
         map_h = int(self.game_height / TILE_SIZE)
         
         length = 0
         while 0 <= current_pos.x < map_w and 0 <= current_pos.y < map_h:
+            # Kiểm tra trước khi bước tiếp
+            next_pos = current_pos + self.direction
+            if not (0 <= next_pos.x < map_w and 0 <= next_pos.y < map_h):
+                break
             length += 1
-            current_pos += self.direction
+            current_pos = next_pos
         return length
         
     def activate(self):
@@ -62,39 +66,28 @@ class Laser(pygame.sprite.Sprite):
             if self.current_length > self.max_length:
                 self.current_length = self.max_length
     
-    def get_laser_positions(self):
-        if not self.active:
+    def get_laser_positions(self, preview=False):
+        if not self.active and not preview:
             return []
-        
+
         positions = []
         pos = self.start_pos.copy()
         map_w = int(self.game_width / TILE_SIZE)
         map_h = int(self.game_height / TILE_SIZE)
-        
-        for _ in range(int(self.current_length)):
+
+        length = int(self.max_length if preview else self.current_length)
+
+        for _ in range(length):
             if 0 <= pos.x < map_w and 0 <= pos.y < map_h:
                 positions.append(pos.copy())
                 pos += self.direction
             else:
                 break
+
         return positions
     
-    def get_laser_positions_preview(self):
-        """Lấy toàn bộ vị trí laser sẽ bắn (dùng cho warning)"""
-        positions = []
-        pos = self.start_pos.copy()
-        map_w = int(self.game_width / TILE_SIZE)
-        map_h = int(self.game_height / TILE_SIZE)
-        
-        for _ in range(int(self.max_length)):
-            if 0 <= pos.x < map_w and 0 <= pos.y < map_h:
-                positions.append(pos.copy())
-                pos += self.direction
-            else:
-                break
-        return positions
     
-    def check_collision_with_body(self, body_list):
+    def check_collision(self, body_list):
         if not self.active:
             return False
         

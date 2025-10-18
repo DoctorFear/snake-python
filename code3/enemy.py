@@ -224,7 +224,7 @@ class Enemy(pygame.sprite.Sprite):
 
             # Vẽ đường laser cảnh báo (chớp đỏ)
             if self.laser:
-                laser_positions = self.laser.get_laser_positions_preview()
+                laser_positions = self.laser.get_laser_positions(preview=True)
                 for pos in laser_positions:
                     x = pos.x * TILE_SIZE - camera_offset[0]
                     y = pos.y * TILE_SIZE - camera_offset[1]
@@ -246,7 +246,7 @@ class Enemy(pygame.sprite.Sprite):
                 return True
         
         # Kiểm tra va chạm với laser
-        if self.laser and self.laser.check_collision_with_body(snake.body):
+        if self.laser and self.laser.check_collision(snake.body):
             return True
         
         return False
